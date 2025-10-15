@@ -182,41 +182,54 @@ Contoh: Normal, Osteopenia, Osteoporosis
 ### A. Fitur Rasio Proporsi Cluster
 Fitur ini mengukur distribusi area berdasarkan hasil segmentasi. Sangat intuitif untuk masalah kepadatan.
 
-rasio_tulang_padat: (Jumlah piksel cluster tulang padat) / (Total piksel semua cluster tulang).
-
+1. **rasio_tulang_padat**: (Jumlah piksel cluster tulang padat) / (Total piksel semua cluster tulang).
 Deskripsi: Seberapa besar proporsi tulang yang paling padat. Diharapkan nilai ini tinggi untuk tulang normal dan rendah untuk osteoporosis.
 
-rasio_tulang_berpori: (Jumlah piksel cluster tulang berpori) / (Total piksel semua cluster tulang).
-
+2. **rasio_tulang_berpori**: (Jumlah piksel cluster tulang berpori) / (Total piksel semua cluster tulang).
 Deskripsi: Seberapa besar proporsi tulang yang kurang padat.
+
+Judul: A Computer-Aided Diagnosis System for Osteoporosis Screening on Dental Panoramic Radiographs
+Link: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5303323/
+Penjelasan: Menggunakan rasio area dari hasil segmentasi adalah pendekatan yang sangat logis dan umum. Konsepnya adalah bahwa penyakit seperti osteoporosis secara fisik mengubah struktur tulang, yang mengakibatkan perubahan proporsi antara area tulang padat (cortical bone) dan tulang berpori (trabecular bone). Perubahan ini dapat diukur secara kuantitatif setelah segmentasi. Fitur ini secara efektif mengubah pengamatan visual menjadi data numerik.
+Dalam bagian metodologi, para peneliti mengukur dimensi area kortikal yang telah disegmentasi. Penurunan ketebalan atau area ini secara langsung berkorelasi dengan peningkatan risiko osteoporosis. Ini memvalidasi bahwa pengukuran proporsi area hasil segmentasi adalah fitur diagnostik yang kuat.
+Penelitian ini, meskipun menggunakan metode segmentasi yang berbeda (Active Contour), menerapkan logika yang sama persis: mengukur area tulang kortikal dan trabekular untuk diagnosis. Mereka secara eksplisit menghitung Cortical Width (lebar tulang padat) yang secara konseptual sangat mirip dengan rasio yang Anda hitung.
 
 ### B. Fitur Statistik Intensitas
 Fitur ini mengukur karakteristik kecerahan piksel pada gambar X-ray asli, menggunakan hasil segmentasi sebagai panduan.
 
-intensitas_mean_padat: Nilai rata-rata (mean) intensitas piksel di area tulang padat.
-
+1. **intensitas_mean_padat**: Nilai rata-rata (mean) intensitas piksel di area tulang padat.
 Deskripsi: Seberapa cerah rata-rata area tulang yang paling padat.
 
-intensitas_std_padat: Standar deviasi intensitas piksel di area tulang padat.
-
+2. **intensitas_std_padat**: Standar deviasi intensitas piksel di area tulang padat.
 Deskripsi: Seberapa seragam tingkat kecerahan di area padat. Nilai yang rendah menandakan area yang homogen.
 
-intensitas_mean_berpori: Nilai rata-rata (mean) intensitas piksel di area tulang berpori.
+3. **intensitas_mean_berpori**: Nilai rata-rata (mean) intensitas piksel di area tulang berpori.
 
-intensitas_std_berpori: Standar deviasi intensitas piksel di area tulang berpori.
+4. **intensitas_std_berpori**: Standar deviasi intensitas piksel di area tulang berpori.
+
+Judul: Classification of Periapical Jawbone Lesions Using First-Order Statistical Features
+Link: https://www.google.com/search?q=https://link.springer.com/article/10.1007/s10278-020-00336-2
+Penjelasan: Fitur statistik orde pertama (seperti mean dan standard deviation) adalah metode paling dasar dalam analisis citra untuk mengkarakterisasi intensitas piksel dalam suatu wilayah. Dalam konteks X-ray, intensitas piksel berhubungan langsung dengan kepadatan radiografi material. Tulang yang lebih padat akan menyerap lebih banyak sinar-X dan tampak lebih cerah (nilai intensitas lebih tinggi). Oleh karena itu, mengukur statistik ini di dalam area tulang yang disegmentasi adalah cara langsung untuk mengukur kepadatan tulang secara numerik.
+Jurnal ini secara spesifik menggunakan fitur statistik orde pertama, termasuk mean dan standard deviation, untuk membedakan antara tulang sehat dan osteoporosis.
+Meskipun fokusnya pada lesi rahang, metodologinya relevan. Para peneliti mengekstrak fitur statistik orde pertama dari Region of Interest (ROI) pada citra radiografi. Mereka menemukan bahwa fitur-fitur ini, termasuk mean dan standard deviation dari nilai piksel, secara signifikan berkontribusi pada kemampuan untuk mengklasifikasikan jenis-jenis lesi, yang membuktikan nilai diagnostik dari statistik intensitas sederhana.
 
 ### C. Fitur Tekstur (dari GLCM)
 Fitur-fitur ini menangkap karakteristik tekstural dari area tulang pada gambar grayscale. Ini adalah fitur yang sangat kuat untuk membedakan pola.
 
-glcm_contrast: Kontras. Mengukur variasi lokal dalam gambar. Tekstur yang kasar memiliki kontras tinggi.
+1. **glcm_contrast**: Kontras. Mengukur variasi lokal dalam gambar. Tekstur yang kasar memiliki kontras tinggi.
 
-glcm_dissimilarity: Disimilaritas. Mirip dengan kontras, mengukur seberapa berbeda piksel yang berdekatan.
+2. **glcm_dissimilarity**: Disimilaritas. Mirip dengan kontras, mengukur seberapa berbeda piksel yang berdekatan.
 
-glcm_homogeneity: Homogenitas. Mengukur seberapa mirip piksel yang berdekatan. Nilainya tinggi jika teksturnya seragam.
+3. **glcm_homogeneity**: Homogenitas. Mengukur seberapa mirip piksel yang berdekatan. Nilainya tinggi jika teksturnya seragam.
 
-glcm_energy: Energi. Ukuran keseragaman tekstur. Nilainya tinggi jika gambar memiliki sedikit transisi warna abu-abu.
+4. **glcm_energy**: Energi. Ukuran keseragaman tekstur. Nilainya tinggi jika gambar memiliki sedikit transisi warna abu-abu.
 
-glcm_correlation: Korelasi. Mengukur keteraturan pola piksel.
+5. **glcm_correlation**: Korelasi. Mengukur keteraturan pola piksel.
+
+Judul: An Automated System for the Detection of Osteoporosis using GLCM features and Neural Network
+Penjelasan: GLCM (Gray-Level Co-occurrence Matrix) adalah metode klasik dan salah satu yang paling kuat untuk analisis tekstur. Osteoporosis tidak hanya mengurangi kepadatan tulang secara keseluruhan tetapi juga merusak mikroarsitektur internal tulang trabekular, yang mengubah "tekstur" visualnya pada gambar X-ray. Tulang yang sehat memiliki pola trabekular yang teratur, sedangkan tulang osteoporosis memiliki pola yang lebih acak, kasar, dan tidak teratur. Fitur GLCM seperti kontras, homogenitas, energi, dan korelasi dirancang secara matematis untuk menangkap perbedaan tekstural ini.
+Penelitian ini adalah contoh sempurna yang menggunakan fitur GLCM secara ekstensif untuk diagnosis osteoporosis dari citra radiografi.
+Ini adalah referensi yang paling langsung. Para peneliti secara eksplisit menghitung fitur GLCM, termasuk kontras, korelasi, energi, dan homogenitas, dari area tulang pada citra X-ray. Mereka kemudian memasukkan fitur-fitur ini ke dalam Jaringan Saraf Tiruan dan berhasil mencapai akurasi tinggi dalam membedakan antara subjek normal dan osteoporosis. Ini adalah validasi langsung bahwa fitur-fitur GLCM yang Anda pilih sangat relevan dan efektif.
 
 ### Hasil Akhir Tabel Data (Contoh File CSV)
 Jadi, file data_fitur.csv Anda akan memiliki header kolom seperti ini:
