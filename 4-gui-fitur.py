@@ -9,10 +9,8 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import os
 
+# --- Fungsi Inti Analisis ---
 def run_analysis(image_path, n_clusters=3):
-    """
-    Fungsi ini menjalankan proses segmentasi GMM-EM pada gambar yang diberikan.
-    """
     try:
         # Membaca gambar dalam mode grayscale
         img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
@@ -38,9 +36,56 @@ def run_analysis(image_path, n_clusters=3):
         # Mengubah kembali array label menjadi bentuk gambar asli
         segmented_image = sorted_labels.reshape(img.shape)
 
-        # Menampilkan hasil menggunakan Matplotlib
-        plt.figure(figsize=(12, 6))
+        # ==========================================================
+        # TAMBAHAN: Menghitung 3 Fitur Rasio
+        # ==========================================================
+        # Asumsi setelah diurutkan:
+        # Label 0 = Background (Paling Gelap)
+        # Label 1 = Tulang Berpori (Abu-abu)
+        # Label 2 = Tulang Padat (Paling Terang)
         
+        pixels_padat = np.count_nonzero(segmented_image == 2)
+        pixels_berpori = np.count_nonzero(segmented_image == 1)
+        pixels_total_tulang = pixels_padat + pixels_berpori
+        pixels_total_gambar = img.size # Total piksel di seluruh gambar
+
+        # 1. rasio_total_tulang_terhadap_gambar
+        if pixels_total_gambar > 0:
+            rasio_total_tulang_terhadap_gambar = pixels_total_tulang / pixels_total_gambar
+        else:
+            rasio_total_tulang_terhadap_gambar = 0.0
+
+        # 2. rasio_tulang_padat_terhadap_total_tulang
+        if pixels_total_tulang > 0:
+            rasio_tulang_padat_terhadap_total_tulang = pixels_padat / pixels_total_tulang
+        else:
+            rasio_tulang_padat_terhadap_total_tulang = 0.0
+            
+        # 3. rasio_padat_vs_berpori
+        if pixels_berpori > 0:
+            rasio_padat_vs_berpori = pixels_padat / pixels_berpori
+        else:
+            # Jika tidak ada piksel berpori (mungkin sangat padat atau error segmentasi)
+            # beri nilai tinggi (pixels_padat + 1) untuk penanda
+            rasio_padat_vs_berpori = pixels_padat + 1.0 
+            if pixels_total_tulang == 0: # Jika keduanya 0
+                rasio_padat_vs_berpori = 0.0
+
+        # 1. Dapatkan nama file
+        file_name = os.path.basename(image_path)
+        
+        # 2. Tambahkan nama file ke string teks
+        fitur_text = (
+            f"File: {file_name}\n"
+            f"--- Hasil Fitur Rasio (Analisis Manual) ---\n"
+            f"1. Rasio Total Tulang (B.Ar/T.Ar): {rasio_total_tulang_terhadap_gambar:.4f}\n"
+            f"2. Rasio Padat / Total Tulang (%Ct.Ar): {rasio_tulang_padat_terhadap_total_tulang:.4f}\n"
+            f"3. Rasio Padat vs Berpori (Ct/Cn Ratio): {rasio_padat_vs_berpori:.4f}"
+        )
+
+        # Menampilkan hasil menggunakan Matplotlib
+        plt.figure(figsize=(12, 7)) # Tinggi
+
         plt.subplot(1, 2, 1)
         plt.title("Gambar Asli")
         plt.imshow(img, cmap='gray')
@@ -52,7 +97,17 @@ def run_analysis(image_path, n_clusters=3):
         plt.axis('off')
 
         plt.suptitle("Hasil Analisis Segmentasi", fontsize=16)
-        plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+        
+        # Mengatur layout agar ada ruang di bawah untuk teks
+        plt.tight_layout(rect=[0, 0.1, 1, 0.95]) 
+        
+        # Menampilkan teks fitur di bawah gambar
+        plt.figtext(0.5, 0.01, fitur_text, 
+                    horizontalalignment='center', 
+                    verticalalignment='bottom', 
+                    fontsize=10, 
+                    bbox={"facecolor":"white", "alpha":0.5, "pad":5})
+
         plt.show()
 
     except Exception as e:
@@ -60,9 +115,6 @@ def run_analysis(image_path, n_clusters=3):
 
 # --- Fungsi untuk GUI ---
 def select_image_and_run():
-    """
-    Membuka dialog untuk memilih file gambar, lalu menjalankan analisis.
-    """
     # Membuka dialog file dan memfilter hanya untuk file gambar
     file_path = filedialog.askopenfilename(
         title="Pilih Gambar X-ray",
@@ -72,7 +124,7 @@ def select_image_and_run():
         ]
     )
 
-    # Jika pengguna memilih file (path tidak kosong)
+    # Jika memilih file (path tidak kosong)
     if file_path:
         # Menampilkan path file yang dipilih di label
         file_name = os.path.basename(file_path)
@@ -84,7 +136,7 @@ def select_image_and_run():
         # Kembalikan teks label ke default setelah analisis selesai
         status_label.config(text="Pilih gambar untuk dianalisis.", foreground="black")
     else:
-        # Jika pengguna membatalkan dialog
+        # Jika membatalkan dialog
         status_label.config(text="Tidak ada file yang dipilih.", foreground="red")
 
 
@@ -98,7 +150,7 @@ if __name__ == "__main__":
 
     # Mengatur style untuk tampilan yang lebih modern
     style = ttk.Style(root)
-    style.theme_use('clam')
+    style.theme_use('clam') # 'alt', 'default', 'classic'
 
     # Membuat frame utama untuk menampung widget
     main_frame = ttk.Frame(root, padding="20")

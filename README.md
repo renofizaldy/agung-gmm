@@ -9,229 +9,90 @@ Jalankan aplikasi:
 
 ---
 
-Skrip GMM-EM tersebut sangat sesuai sebagai langkah awal yang fundamental dalam proyek Anda untuk mengidentifikasi tingkat kepadatan tulang.
+## Penentuan Fitur atau Klasifikasi
 
-Namun, penting untuk memahami perannya. Skrip yang kita buat BUKAN alat diagnosis akhir, melainkan alat analisis citra yang kuat untuk mengekstrak informasi penting dari gambar.
+### 1. rasio_total_tulang_terhadap_gambar
 
-## Peran Skrip GMM-EM dalam Tujuan Anda
+* **Nama Ilmiah:** Bone Area / Total Area (B.Ar/T.Ar) atau Bone Area Fraction.
+* **Validasi Konsep:** Ini adalah parameter histomorfometri paling dasar. Fitur ini mengukur berapa persen dari total area sampel (ROI - *Region of Interest*) yang benar-benar terisi oleh materi tulang (baik padat maupun berpori). Ini adalah ukuran langsung dari massa tulang dalam 2D.
+* **Rumus Perhitungan:**
+    ```
+    (pixels_padat + pixels_berpori) / pixels_total_gambar
+    ```
+* **Referensi Jurnal:**
+    * **Judul:** *Bone histomorphometry revisited* (Tinjauan ulang histomorfometri tulang)
+    * **Penjelasan Relevan:** Artikel ini secara eksplisit mendefinisikan parameter-parameter standar. Dinyatakan: *"Bone area (2D, volume in 3D) is the percentage of occupied area by calcified bone in relation to the total area."* (Area tulang (2D, volume dalam 3D) adalah persentase area yang ditempati oleh tulang terkalsifikasi dalam kaitannya dengan total area).
+    * **Tautan:** https://www.researchgate.net/publication/257814134_Bone_histomorphometry_revisited
 
-Pikirkan skrip GMM-EM ini sebagai "mata" dari sistem Anda. Tugasnya adalah melakukan segmentasi, yaitu memisahkan dan memberi label pada area-area berbeda di dalam citra X-ray berdasarkan intensitas pikselnya.
+### 2. rasio_tulang_padat_terhadap_total_tulang
 
-Secara spesifik, skrip ini akan mengelompokkan piksel menjadi beberapa cluster, yang bisa kita interpretasikan sebagai:
+* **Nama Ilmiah:** Percent Cortical Area (%Ct.Ar) atau Cortical Bone Fraction.
+* **Validasi Konsep:** Setelah mengetahui total area tulang (dari fitur #1), langkah logis berikutnya adalah membedah komposisinya. Fitur ini mengukur seberapa besar bagian dari total tulang tersebut yang merupakan tulang kortikal (padat). Banyak penelitian menggunakan ketebalan kortikal (*Cortical Thickness*) sebagai proxy, namun mengukur area adalah analisis 2D yang lebih lengkap.
+* **Rumus Perhitungan:**
+    ```
+    pixels_padat / (pixels_padat + pixels_berpori)
+    ```
+* **Referensi Jurnal:**
+    * **Judul:** *Panoramic Measures for Oral Bone Mass in Detecting Osteoporosis: A Systematic Review and Meta-Analysis* (Pengukuran Panoramik untuk Massa Tulang Oral dalam Mendeteksi Osteoporosis: Tinjauan Sistematis dan Meta-Analisis)
+    * **Penjelasan Relevan:** Tinjauan sistematis ini membahas berbagai "indeks radiomorfometrik" yang dihitung dari X-ray panoramik (gigi) untuk mendeteksi kepadatan tulang yang rendah (BMD). Banyak dari indeks ini, seperti *Panoramic Mandibular Index (PMI)*, didasarkan pada pengukuran rasio ketebalan kortikal terhadap dimensi tulang lainnya. Ini memvalidasi konsep bahwa rasio yang melibatkan tulang kortikal (padat) adalah alat skrining yang efektif untuk osteoporosis.
+    * **Tautan:** https://pmc.ncbi.nlm.nih.gov/articles/PMC4541087/
 
-Cluster 1 (Paling Gelap): Latar belakang atau jaringan lunak.
+### 3. rasio_padat_vs_berpori
 
-Cluster 2 (Abu-abu): Area tulang dengan kepadatan rendah atau berpori (mungkin indikasi osteopenia/osteoporosis).
-
-Cluster 3 (Paling Terang): Area tulang yang sangat padat (indikasi tulang normal).
-
-Jadi, output dari skrip ini adalah sebuah gambar tersegmentasi yang secara visual menunjukkan distribusi area padat dan tidak padat.
-
-## Alur Kerja untuk Klasifikasi (Normal, Osteopenia, Osteoporosis)
-
-Untuk mencapai tujuan akhir Anda (memberi label "Normal", "Osteopenia", atau "Osteoporosis"), Anda perlu menambahkan beberapa langkah setelah menggunakan skrip GMM-EM.
-
-Berikut adalah alur kerja penelitian yang umum:
-
-### **Tahap 1: Segmentasi dengan GMM-EM (✅ Sudah Selesai)**
-Gunakan skrip `gui.py` untuk mengubah setiap gambar X-ray menjadi gambar tersegmentasi. Ini adalah langkah pertama dan paling penting.
-
-### **Tahap 2: Ekstraksi Fitur (Langkah Selanjutnya)**
-Dari gambar tersegmentasi, Anda perlu menghitung **data kuantitatif** (fitur). Ini mengubah gambar visual menjadi angka yang bisa dianalisis. Contoh fitur yang bisa diekstrak:
--   **Rasio Kepadatan**: Hitung persentase piksel yang termasuk dalam cluster "tulang sangat padat" dibandingkan dengan total piksel tulang.
-  -   _Logikanya_: Pasien **osteoporosis** akan memiliki persentase cluster padat yang **jauh lebih rendah**.
--   **Intensitas Rata-rata**: Hitung nilai intensitas rata-rata dari cluster tulang padat.
--   **Fitur Tekstur**: Analisis statistik yang lebih canggih untuk melihat seberapa "kasar" atau "halus" tekstur tulang pada gambar.
-
-### **Tahap 3: Klasifikasi dengan Machine Learning (Tujuan Akhir)**
-Setelah Anda memiliki sekumpulan data fitur dari banyak gambar, Anda bisa melatih model machine learning (seperti SVM, Random Forest, atau Neural Network) untuk:
-1.  Mempelajari pola fitur dari gambar yang sudah diketahui labelnya (Normal, Osteopenia, Osteoporosis).
-2.  Membuat model yang dapat **memprediksi** label untuk gambar baru berdasarkan fitur yang diekstrak.
-
----
-
-## Referensi Jurnal Ilmiah
-
-Saya telah memilihkan beberapa contoh yang menggunakan pendekatan berbeda namun tetap relevan dengan tujuan Anda.
-
-### **1. Referensi Fokus pada Analisis Tekstur (Fitur Klasik)**
-
--   **Judul**: _An Automated System for the Detection of Osteoporosis using GLCM features and Neural Network_.
-    
--   **Penulis**: M. S. Kavitha et al.
-    
--   **Jurnal/Publikasi**: _International Journal of Computer Applications_.
-    
--   **Fokus Utama**: Penelitian ini adalah contoh klasik yang sangat cocok untuk Anda. Mereka menggunakan radiograf (citra X-ray) dan melakukan **ekstraksi fitur tekstur** menggunakan metode _Gray-Level Co-occurrence Matrix_ (GLCM). Kemudian, mereka menggunakan **Jaringan Saraf Tiruan (Neural Network)** sebagai classifier untuk membedakan antara tulang normal dan osteoporosis. Ini adalah contoh langsung dari Tahap 2 dan 3.
-
-
-### **2. Referensi Menggunakan Radiografi Gigi (Aplikasi Umum)**
-
--   **Judul**: _A Computer-Aided Diagnosis System for Osteoporosis Screening on Dental Panoramic Radiographs_.
-    
--   **Penulis**: F. S. C. Leite et al.
-    
--   **Jurnal/Publikasi**: _Journal of Clinical and Experimental Dentistry_.
-    
--   **Fokus Utama**: Jurnal ini menunjukkan aplikasi yang sangat umum, yaitu mendeteksi risiko osteoporosis dari X-ray gigi panoramik. Mereka mengekstrak **fitur morfometri** (berdasarkan bentuk) dan **tekstur**. Untuk klasifikasi, mereka menggunakan **Support Vector Machine (SVM)**. Ini memberi Anda contoh variasi fitur dan model klasifikasi yang bisa digunakan.
-
-
-### **3. Referensi dengan Pendekatan Deep Learning (Modern)**
-
--   **Judul**: _Deep Learning Approach for Osteoporosis Classification Based on Hip X-Ray Images_.
-    
--   **Penulis**: M. Unal et al.
-    
--   **Jurnal/Publikasi**: _Applied Sciences_.
-    
--   **Fokus Utama**: Ini adalah contoh pendekatan yang lebih modern. Mereka menggunakan _Convolutional Neural Networks_ (CNN), sebuah arsitektur _Deep Learning_. Kelebihan metode ini adalah **ekstraksi fitur dan klasifikasi terjadi secara otomatis** di dalam satu model. Meskipun lebih kompleks, ini menunjukkan ke mana arah penelitian saat ini. Anda bisa melihat bagaimana mereka membandingkan performa model otomatis ini dengan metode klasik.
-
-
-### Poin Kunci dari Referensi di Atas
-
--   **Ekstraksi Fitur itu Wajib**: Semua penelitian (yang tidak menggunakan _deep learning end-to-end_) selalu memiliki tahap ekstraksi fitur setelah segmentasi. Fitur yang paling umum adalah **fitur tekstur** (GLCM, LBP) dan **morfometri** (bentuk dan ukuran).
-    
--   **Model Klasifikasi Bervariasi**: Tidak ada satu model terbaik. **SVM** dan **Jaringan Saraf Tiruan (ANN)** adalah pilihan yang sangat populer dan terbukti efektif untuk masalah klasifikasi medis seperti ini.
-    
--   **Validasi Pendekatan Anda**: Jurnal-jurnal ini secara kolektif memvalidasi bahwa alur kerja 3 tahap (Segmentasi ⟶ Ekstraksi Fitur ⟶ Klasifikasi) adalah metodologi standar dan diterima secara ilmiah untuk masalah diagnosis berbantuan komputer (_Computer-Aided Diagnosis_).
+* **Nama Ilmiah:** Cortical-to-Trabecular Ratio (Rasio Kortikal-terhadap-Trabekular) atau Cortical/Cancellous Ratio.
+* **Validasi Konsep:** Ini adalah fitur yang sangat kuat secara diagnostik. Penelitian menunjukkan bahwa osteoporosis seringkali memengaruhi tulang trabekular (berpori) terlebih dahulu dan lebih agresif daripada tulang kortikal (padat). Oleh karena itu, rasio antara keduanya adalah indikator yang sangat sensitif terhadap perubahan penyakit.
+* **Rumus Perhitungan:**
+    ```
+    pixels_padat / pixels_berpori
+    ```
+* **Referensi Jurnal:**
+    * **Judul:** *Bone mechanical properties and changes with osteoporosis* (Sifat mekanis tulang dan perubahannya dengan osteoporosis)
+    * **Penjelasan Relevan:** Artikel ini menjelaskan perbedaan antara kedua jenis tulang. Ia menyebutkan: *"Thus, the bone loss in early osteoporosis is mainly a trabecular bone loss."* (Dengan demikian, kehilangan tulang pada osteoporosis dini sebagian besar adalah kehilangan tulang trabekular). Hal ini secara langsung memvalidasi mengapa fitur `(Piksel Padat) / (Piksel Berpori)` sangat penting. Ketika tulang berpori (penyebut) hilang, rasio ini akan berubah secara dramatis.
+    * **Tautan:** https://pmc.ncbi.nlm.nih.gov/articles/PMC4955555/
 
 ---
 
-## Alur Kerja Tahap 2: Ekstraksi Fitur
+## Penentuan Jumlah Cluster dalam Segmentasi GMM
 
-Berikut adalah langkah-langkah konkret yang bisa Anda lakukan:
+Tujuan dari penentuan jumlah cluster (misalnya, 3 atau 4) dalam Gaussian Mixture Models (GMM) adalah untuk menginstruksikan algoritma mengenai jumlah kelompok kepadatan berbeda yang harus diidentifikasi di dalam citra X-ray. Pengaturan parameter ini bersifat krusial karena akan secara langsung memengaruhi hasil segmentasi citra.
 
-### **1. Input**
+### Skenario 3 Cluster
 
-Input untuk tahap ini adalah **gambar yang sudah tersegmentasi** dari Tahap 1. Ini adalah sebuah array 2D di mana setiap nilainya adalah label cluster (misalnya, 0 untuk background, 1 untuk tulang berpori, 2 untuk tulang padat).
+Skenario 3 cluster merupakan pendekatan awal yang paling logis dan sederhana. Dalam konfigurasi ini, GMM membagi semua piksel citra menjadi tiga kelompok utama berdasarkan intensitasnya:
 
-### **2. Pilih dan Hitung Fitur**
+* **Cluster 1 (Kepadatan Paling Rendah / Hitam):** Merepresentasikan **latar belakang** (background) atau udara. Piksel-piksel ini tidak memiliki informasi kepadatan tulang dan harus diisolasi agar tidak mengganggu kalkulasi fitur.
+* **Cluster 2 (Kepadatan Menengah / Abu-abu):** Merepresentasikan **tulang berpori (trabekular)**. Area ini juga dapat mencakup jaringan lunak (otot/lemak) yang memiliki atenuasi sinar-X serupa.
+* **Cluster 3 (Kepadatan Paling Tinggi / Putih):** Merepresentasikan **tulang padat (kortikal)**. Ini adalah area dengan kepadatan radiografi tertinggi.
 
-Anda akan menulis kode untuk menghitung beberapa angka statistik dari setiap gambar tersegmentasi. Mari kita mulai dari yang paling sederhana hingga yang lebih canggih.
+**Keuntungan:** Model ini secara efisien menyediakan dua komponen tulang esensial (`Piksel Padat` dan `Piksel Berpori`) yang diperlukan untuk perhitungan fitur rasio.
 
-**A. Fitur Paling Sederhana: Rasio Proporsi Cluster** Ini adalah fitur yang paling intuitif dan kuat untuk kasus Anda.
+#### Justifikasi Logis untuk 3 Cluster
 
--   **Apa yang dihitung?** Berapa persen dari total area tulang yang merupakan "tulang padat"?
-    
--   **Cara menghitung:**
-    
-    1.  Hitung jumlah piksel untuk cluster tulang padat (misal, cluster label `2`).
-        
-    2.  Hitung jumlah piksel untuk semua area tulang (cluster `1` + cluster `2`).
-        
-    3.  Bagi keduanya: `Rasio = (Jumlah Piksel Padat) / (Total Piksel Tulang)`.
-        
--   **Hasil:** Anda akan mendapatkan **satu angka** (misalnya `0.75`) untuk setiap gambar. Angka ini merepresentasikan kepadatan tulang secara keseluruhan.
-    
+Alasan paling logis untuk menggunakan 3 cluster adalah karena citra X-ray tulang secara fisik memiliki tiga "area" kepadatan utama yang berbeda dan relevan untuk analisis. Pemisahan ini mutlak diperlukan untuk mengekstrak fitur rasio kunci, seperti `rasio_padat_vs_berpori`, yang formulanya adalah:
 
-**B. Fitur Statistik Intensitas** Anda bisa menggunakan segmentasi sebagai "topeng" untuk menganalisis gambar asli (grayscale).
+`(Jumlah Piksel Padat) / (Jumlah Piksel Berpori)`
 
--   **Apa yang dihitung?** Seberapa terang rata-rata area tulang padat?
-    
--   **Cara menghitung:**
-    
-    1.  Ambil gambar X-ray asli (sebelum segmentasi).
-        
-    2.  Hitung nilai intensitas rata-rata (`mean`) dan standar deviasi (`std`) dari piksel-piksel yang _hanya_ termasuk dalam cluster tulang padat.
-        
--   **Hasil:** Anda mendapatkan **dua angka lagi** untuk setiap gambar: `rata_rata_intensitas` dan `std_dev_intensitas`.
-    
+Untuk menghitung rasio ini, diperlukan tiga kelompok data:
 
-**C. Fitur Tekstur (Lebih Lanjut)** Seperti yang disebutkan di jurnal, fitur tekstur dari **Gray-Level Co-occurrence Matrix (GLCM)** sangat populer.
+1.  Satu kelompok untuk **Piksel Padat** (dari Cluster 3 / Putih).
+2.  Satu kelompok untuk **Piksel Berpori** (dari Cluster 2 / Abu-abu).
+3.  Satu kelompok untuk **Latar Belakang** (dari Cluster 1 / Hitam) yang harus dieliminasi dari perhitungan.
 
--   **Apa yang dihitung?** Karakteristik tekstur seperti **kontras**, **homogenitas**, **energi**, dan **korelasi** pada area tulang.
-    
--   **Bagaimana caranya?** Anda tidak perlu menghitung manual. Pustaka `scikit-image` di Python memiliki fungsi untuk menghitung ini dengan mudah.
-    
--   **Hasil:** Anda mendapatkan **beberapa angka lagi** yang mendeskripsikan tekstur tulang.
-    
+Dengan demikian, penggunaan 3 cluster adalah jumlah minimum yang logis dan diperlukan untuk mengekstrak dua komponen utama dalam formula fitur rasio tersebut.
 
-### **3. Struktur Data Output**
+### Skenario 4 Cluster (Alternatif)
 
-Setelah Anda menghitung semua fitur ini untuk **satu gambar**, Anda akan memiliki sebuah **array 1D** atau list, contohnya:
+Skenario 4 cluster dapat dipertimbangkan jika skenario 3 cluster dinilai terlalu sederhana, terutama jika terjadi percampuran signifikan antara jaringan lunak dan tulang berpori dalam satu cluster (Cluster 2).
 
-`[0.75, 185.5, 12.3, 0.92, 0.88, ...]` `[rasio, mean_intensitas, std_dev, kontras, homogenitas, ...]`
+Dengan memilih 4 cluster, GMM dapat memisahkan komponen-komponen ini dengan lebih detail:
 
-Anda akan melakukan proses ini untuk **semua gambar** dalam dataset Anda. Hasil akhirnya akan menjadi sebuah **tabel besar (array 2D)**, di mana:
+* **Cluster 1 (Paling Gelap):** Latar Belakang / Udara.
+* **Cluster 2 (Abu-abu Gelap):** Jaringan Lunak (Otot, Lemak).
+* **Cluster 3 (Abu-abu Terang):** Tulang Berpori (Trabekular).
+* **Cluster 4 (Paling Terang):** Tulang Padat (Kortikal).
 
--   Setiap **baris** mewakili **satu gambar (satu pasien)**.
-    
--   Setiap **kolom** mewakili **satu fitur** yang Anda hitung.
-    
--   Anda juga akan menambahkan satu kolom terakhir, yaitu **label/target** (Normal, Osteopenia, Osteoporosis) yang sudah Anda ketahui.
-    
+**Keuntungan:** Pendekatan ini berpotensi menghasilkan segmentasi tulang yang lebih "bersih" dan akurat dengan mengisolasi jaringan lunak yang dapat mengganggu.
 
-Struktur data ini biasanya disimpan dalam **file CSV** menggunakan pustaka **Pandas**
+### Pertimbangan Metodologis
 
----
-
-## Daftar Kolom (Fitur) untuk Tabel Data Anda
-Berikut adalah rincian kolom yang akan Anda buat.
-
-Kolom Identifikasi
-Ini adalah kolom dasar untuk melacak data Anda.
-
-image_id: Nama file atau ID unik dari setiap gambar.
-
-Contoh: xray_001.jpg
-
-diagnosis: Label target yang akan diprediksi. Ini adalah data "jawaban" yang sudah Anda ketahui dari ahli medis.
-
-Contoh: Normal, Osteopenia, Osteoporosis
-
-### A. Fitur Rasio Proporsi Cluster
-Fitur ini mengukur distribusi area berdasarkan hasil segmentasi. Sangat intuitif untuk masalah kepadatan.
-
-1. **rasio_tulang_padat**: (Jumlah piksel cluster tulang padat) / (Total piksel semua cluster tulang).
-Deskripsi: Seberapa besar proporsi tulang yang paling padat. Diharapkan nilai ini tinggi untuk tulang normal dan rendah untuk osteoporosis.
-
-2. **rasio_tulang_berpori**: (Jumlah piksel cluster tulang berpori) / (Total piksel semua cluster tulang).
-Deskripsi: Seberapa besar proporsi tulang yang kurang padat.
-
-Judul: A Computer-Aided Diagnosis System for Osteoporosis Screening on Dental Panoramic Radiographs
-Link: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5303323/
-Penjelasan: Menggunakan rasio area dari hasil segmentasi adalah pendekatan yang sangat logis dan umum. Konsepnya adalah bahwa penyakit seperti osteoporosis secara fisik mengubah struktur tulang, yang mengakibatkan perubahan proporsi antara area tulang padat (cortical bone) dan tulang berpori (trabecular bone). Perubahan ini dapat diukur secara kuantitatif setelah segmentasi. Fitur ini secara efektif mengubah pengamatan visual menjadi data numerik.
-Dalam bagian metodologi, para peneliti mengukur dimensi area kortikal yang telah disegmentasi. Penurunan ketebalan atau area ini secara langsung berkorelasi dengan peningkatan risiko osteoporosis. Ini memvalidasi bahwa pengukuran proporsi area hasil segmentasi adalah fitur diagnostik yang kuat.
-Penelitian ini, meskipun menggunakan metode segmentasi yang berbeda (Active Contour), menerapkan logika yang sama persis: mengukur area tulang kortikal dan trabekular untuk diagnosis. Mereka secara eksplisit menghitung Cortical Width (lebar tulang padat) yang secara konseptual sangat mirip dengan rasio yang Anda hitung.
-
-### B. Fitur Statistik Intensitas
-Fitur ini mengukur karakteristik kecerahan piksel pada gambar X-ray asli, menggunakan hasil segmentasi sebagai panduan.
-
-1. **intensitas_mean_padat**: Nilai rata-rata (mean) intensitas piksel di area tulang padat.
-Deskripsi: Seberapa cerah rata-rata area tulang yang paling padat.
-
-2. **intensitas_std_padat**: Standar deviasi intensitas piksel di area tulang padat.
-Deskripsi: Seberapa seragam tingkat kecerahan di area padat. Nilai yang rendah menandakan area yang homogen.
-
-3. **intensitas_mean_berpori**: Nilai rata-rata (mean) intensitas piksel di area tulang berpori.
-
-4. **intensitas_std_berpori**: Standar deviasi intensitas piksel di area tulang berpori.
-
-Judul: Classification of Periapical Jawbone Lesions Using First-Order Statistical Features
-Link: https://www.google.com/search?q=https://link.springer.com/article/10.1007/s10278-020-00336-2
-Penjelasan: Fitur statistik orde pertama (seperti mean dan standard deviation) adalah metode paling dasar dalam analisis citra untuk mengkarakterisasi intensitas piksel dalam suatu wilayah. Dalam konteks X-ray, intensitas piksel berhubungan langsung dengan kepadatan radiografi material. Tulang yang lebih padat akan menyerap lebih banyak sinar-X dan tampak lebih cerah (nilai intensitas lebih tinggi). Oleh karena itu, mengukur statistik ini di dalam area tulang yang disegmentasi adalah cara langsung untuk mengukur kepadatan tulang secara numerik.
-Jurnal ini secara spesifik menggunakan fitur statistik orde pertama, termasuk mean dan standard deviation, untuk membedakan antara tulang sehat dan osteoporosis.
-Meskipun fokusnya pada lesi rahang, metodologinya relevan. Para peneliti mengekstrak fitur statistik orde pertama dari Region of Interest (ROI) pada citra radiografi. Mereka menemukan bahwa fitur-fitur ini, termasuk mean dan standard deviation dari nilai piksel, secara signifikan berkontribusi pada kemampuan untuk mengklasifikasikan jenis-jenis lesi, yang membuktikan nilai diagnostik dari statistik intensitas sederhana.
-
-### C. Fitur Tekstur (dari GLCM)
-Fitur-fitur ini menangkap karakteristik tekstural dari area tulang pada gambar grayscale. Ini adalah fitur yang sangat kuat untuk membedakan pola.
-
-1. **glcm_contrast**: Kontras. Mengukur variasi lokal dalam gambar. Tekstur yang kasar memiliki kontras tinggi.
-
-2. **glcm_dissimilarity**: Disimilaritas. Mirip dengan kontras, mengukur seberapa berbeda piksel yang berdekatan.
-
-3. **glcm_homogeneity**: Homogenitas. Mengukur seberapa mirip piksel yang berdekatan. Nilainya tinggi jika teksturnya seragam.
-
-4. **glcm_energy**: Energi. Ukuran keseragaman tekstur. Nilainya tinggi jika gambar memiliki sedikit transisi warna abu-abu.
-
-5. **glcm_correlation**: Korelasi. Mengukur keteraturan pola piksel.
-
-Judul: An Automated System for the Detection of Osteoporosis using GLCM features and Neural Network
-Penjelasan: GLCM (Gray-Level Co-occurrence Matrix) adalah metode klasik dan salah satu yang paling kuat untuk analisis tekstur. Osteoporosis tidak hanya mengurangi kepadatan tulang secara keseluruhan tetapi juga merusak mikroarsitektur internal tulang trabekular, yang mengubah "tekstur" visualnya pada gambar X-ray. Tulang yang sehat memiliki pola trabekular yang teratur, sedangkan tulang osteoporosis memiliki pola yang lebih acak, kasar, dan tidak teratur. Fitur GLCM seperti kontras, homogenitas, energi, dan korelasi dirancang secara matematis untuk menangkap perbedaan tekstural ini.
-Penelitian ini adalah contoh sempurna yang menggunakan fitur GLCM secara ekstensif untuk diagnosis osteoporosis dari citra radiografi.
-Ini adalah referensi yang paling langsung. Para peneliti secara eksplisit menghitung fitur GLCM, termasuk kontras, korelasi, energi, dan homogenitas, dari area tulang pada citra X-ray. Mereka kemudian memasukkan fitur-fitur ini ke dalam Jaringan Saraf Tiruan dan berhasil mencapai akurasi tinggi dalam membedakan antara subjek normal dan osteoporosis. Ini adalah validasi langsung bahwa fitur-fitur GLCM yang Anda pilih sangat relevan dan efektif.
-
-### Hasil Akhir Tabel Data (Contoh File CSV)
-Jadi, file data_fitur.csv Anda akan memiliki header kolom seperti ini:
-
-image_id,diagnosis,rasio_tulang_padat,rasio_tulang_berpori,intensitas_mean_padat,intensitas_std_padat,intensitas_mean_berpori,intensitas_std_berpori,glcm_contrast,glcm_dissimilarity,glcm_homogeneity,glcm_energy,glcm_correlation
+Rekomendasi umumnya adalah memulai analisis dengan **3 cluster** sebagai asumsi dasar. Jika hasil segmentasi visual menunjukkan bahwa cluster tulang berpori (trabekular) terlihat jelas tercampur dengan jaringan lunak di sekitarnya, eksperimen dapat dilanjutkan dengan meningkatkan jumlah cluster menjadi **4** untuk mengevaluasi apakah pemisahan yang lebih baik dapat dicapai.
