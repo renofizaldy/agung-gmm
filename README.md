@@ -52,6 +52,44 @@ Jalankan aplikasi:
 
 ---
 
+## Metodologi Penetapan Nilai Patokan (Baseline) untuk Analisis Fitur
+
+Untuk melakukan analisis kuantitatif yang bermakna terhadap fitur rasio, langkah metodologis pertama adalah menetapkan **rentang nilai referensi (reference range)** atau **garis dasar (baseline)**. Hal ini didasarkan pada prinsip bahwa sebuah nilai fitur (misalnya, rasio 4.5) tidak dapat diinterpretasikan sebagai "tinggi" atau "rendah" tanpa perbandingan terhadap nilai "normal" yang telah ditetapkan untuk dataset yang sama.
+
+Proses untuk menetapkan baseline ini adalah sebagai berikut:
+
+1.  **Penetapan Garis Dasar "Normal"**: Sejumlah sampel citra (misalnya, 5-10) yang secara visual diidentifikasi sebagai "normal" atau "sehat" diproses. Fitur rasio yang diekstraksi dari sampel-sampel ini (misalnya, `[1.9, 2.1, 2.0, 1.8, 2.2]`) dikumpulkan.
+2.  **Penentuan Rentang Referensi**: Dari kumpulan data tersebut, sebuah rentang referensi awal dapat disimpulkan (misalnya, ~1.8 - 2.2). Rentang ini bersifat spesifik untuk dataset yang digunakan dan dipengaruhi oleh parameter akuisisi citra (misalnya, model mesin X-ray).
+3.  **Identifikasi Pola Patologis**: Selanjutnya, kumpulan sampel pembanding yang secara visual tampak "berpori" atau patologis dianalisis. Kumpulan fitur rasio yang dihasilkan (misalnya, `[4.5, 5.1, 4.8, 5.3, 4.9]`) akan dibandingkan dengan rentang referensi.
+4.  **Kesimpulan Analisis Awal**: Analisis komparatif ini menghasilkan patokan kuantitatif kasar. Nilai yang berada dalam rentang referensi (~2.0) dapat dianggap normal, sedangkan nilai yang secara signifikan melebihi rentang tersebut (>4.5) merupakan indikator potensi patologi.
+
+Oleh karena itu, agregasi nilai fitur (misalnya, dalam bentuk array atau tabel) dari kelompok sampel yang diketahui kondisinya adalah langkah penting untuk mendefinisikan rentang patokan yang unik dan spesifik untuk dataset tersebut.
+
+### Validasi Metodologi dalam Literatur Ilmiah
+
+Pendekatan untuk menetapkan baseline ini didukung oleh praktik metodologis standar dalam penelitian diagnosis berbantuan komputer (Computer-Aided Diagnosis - CAD).
+
+* **Referensi:** *A Computer-Aided Diagnosis System for Osteoporosis Screening on Dental Panoramic Radiographs*
+* **Tautan:** [https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5303323/](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5303323/)
+
+#### Dukungan Metodologis:
+
+Penelitian ini memvalidasi pendekatan tersebut. Alih-alih menggunakan ambang batas universal yang telah ditentukan sebelumnya, penelitian tersebut menerapkan protokol berikut:
+
+1.  **Pengumpulan Sampel:** Mengumpulkan data dari 140 pasien.
+2.  **Stratifikasi Grup:** Pasien dibagi menjadi dua kelompok berdasarkan hasil tes standar (DEXA scan):
+    * **Kelompok Kontrol (Control Group):** 70 pasien dengan kepadatan tulang **Normal**.
+    * **Kelompok Tes (Test Group):** 70 pasien dengan kepadatan tulang rendah (**Osteopenia/Osteoporosis**).
+3.  **Ekstraksi Fitur:** Berbagai fitur, termasuk indeks morfometri dan tekstur (analog dengan fitur rasio dan GLCM yang digunakan), dihitung dari citra X-ray.
+4.  **Analisis Statistik (Metodologi Inti):** Nilai fitur dari **Kelompok Kontrol (Normal)** diisolasi. **Nilai rata-rata (mean)** dan **standar deviasi** dari kelompok ini kemudian dihitung untuk menetapkan **garis dasar referensi statistik** mereka.
+5.  **Kesimpulan:** Nilai fitur dari Kelompok Tes kemudian dibandingkan secara statistik terhadap baseline normal tersebut, yang menunjukkan adanya perbedaan signifikan.
+
+### Kesimpulan
+
+Jurnal tersebut memvalidasi metodologi yang diusulkan. Proses "mengumpulkan nilai dalam bentuk array" adalah implementasi praktis dari langkah ilmiah krusial yang dikenal sebagai **"menganalisis distribusi fitur dari kelompok kontrol"**. Langkah ini esensial untuk membangun rentang patokan kuantitatif yang unik dan spesifik untuk sebuah dataset penelitian.
+
+---
+
 ## Penentuan Jumlah Cluster dalam Segmentasi GMM
 
 Tujuan dari penentuan jumlah cluster (misalnya, 3 atau 4) dalam Gaussian Mixture Models (GMM) adalah untuk menginstruksikan algoritma mengenai jumlah kelompok kepadatan berbeda yang harus diidentifikasi di dalam citra X-ray. Pengaturan parameter ini bersifat krusial karena akan secara langsung memengaruhi hasil segmentasi citra.
