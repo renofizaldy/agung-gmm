@@ -90,6 +90,51 @@ Jurnal tersebut memvalidasi metodologi yang diusulkan. Proses "mengumpulkan nila
 
 ---
 
+## Analisis Statistik Deskriptif untuk Penentuan Rentang Fitur
+
+Setelah agregasi data fitur dari sekumpulan sampel (misalnya, N=10), langkah metodologis selanjutnya adalah melakukan analisis statistik deskriptif. Tujuan dari analisis ini adalah untuk mengkuantifikasi distribusi nilai fitur dan menetapkan rentang referensi (baseline) untuk setiap kelompok yang dianalisis.
+
+### Parameter Statistik Kunci
+
+Karakterisasi kuantitatif dari distribusi data ini dicapai dengan menghitung parameter statistik deskriptif dasar berikut:
+
+1.  **Nilai Minimum (Min):** Merepresentasikan batas bawah dari rentang data yang diamati.
+2.  **Nilai Maksimum (Max):** Merepresentasikan batas atas dari rentang data yang diamati.
+3.  **Nilai Rata-rata (Mean):** Ukuran tendensi sentral (*central tendency*), yang mengindikasikan nilai "tipikal" atau rata-rata dalam kelompok sampel.
+4.  **Standar Deviasi (Standard Deviation):** Ukuran dispersi statistik, yang mengkuantifikasi jumlah variasi atau sebaran data dari nilai rata-ratanya.
+
+### Aplikasi pada Penentuan Rentang
+
+Secara teknis, "rentang nilai" (range) untuk suatu kelompok sampel didefinisikan oleh nilai minimum dan maksimumnya. Nilai rata-rata menyediakan titik pusat dari distribusi tersebut.
+
+#### Studi Kasus Hipotetis:
+
+Sebagai ilustrasi, dua kelompok sampel (Normal dan Berpori) dianalisis:
+
+**1. Kelompok Kontrol (Sampel 'Normal')**
+* **Kumpulan Data (N=10):** `[1.9, 2.1, 2.0, 1.8, 2.2, 1.9, 2.0, 2.1, 2.2, 1.8]`
+* **Analisis Statistik:**
+    * Nilai Minimum: **1.80**
+    * Nilai Maksimum: **2.20**
+    * Nilai Rata-rata (Mean): **2.00**
+    * Standar Deviasi: 0.16
+* **Interpretasi:** Rentang referensi "Normal" untuk dataset ini dapat ditetapkan antara **1.80 - 2.20**, dengan tendensi sentral di **2.00**.
+
+**2. Kelompok Tes (Sampel 'Berpori')**
+* **Kumpulan Data (N=10):** `[4.5, 5.1, 4.8, 5.3, 4.9, 4.7, 5.0, 5.2, 4.6, 5.3]`
+* **Analisis Statistik:**
+    * Nilai Minimum: **4.50**
+    * Nilai Maksimum: **5.30**
+    * Nilai Rata-rata (Mean): **4.94**
+    * Standar Deviasi: 0.29
+* **Interpretasi:** Rentang patologis "Berpori" untuk dataset ini teramati antara **4.50 - 5.30**, dengan tendensi sentral di **4.94**.
+
+### Kesimpulan
+
+Perhitungan statistik deskriptif (terutama Min, Max, dan Mean) adalah alat fundamental untuk menetapkan rentang patokan secara empiris dari data sampel. Perhitungan ini dapat difasilitasi menggunakan pustaka komputasi ilmiah seperti **NumPy** (misalnya, `np.min()`, `np.max()`, `np.mean()`).
+
+---
+
 ## Penentuan Jumlah Cluster dalam Segmentasi GMM
 
 Tujuan dari penentuan jumlah cluster (misalnya, 3 atau 4) dalam Gaussian Mixture Models (GMM) adalah untuk menginstruksikan algoritma mengenai jumlah kelompok kepadatan berbeda yang harus diidentifikasi di dalam citra X-ray. Pengaturan parameter ini bersifat krusial karena akan secara langsung memengaruhi hasil segmentasi citra.
