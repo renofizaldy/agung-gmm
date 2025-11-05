@@ -133,6 +133,28 @@ Sebagai ilustrasi, dua kelompok sampel (Normal dan Berpori) dianalisis:
 
 Perhitungan statistik deskriptif (terutama Min, Max, dan Mean) adalah alat fundamental untuk menetapkan rentang patokan secara empiris dari data sampel. Perhitungan ini dapat difasilitasi menggunakan pustaka komputasi ilmiah seperti **NumPy** (misalnya, `np.min()`, `np.max()`, `np.mean()`).
 
+Tentu. Pendekatan metodologis untuk menetapkan rentang patokan (baseline) dengan menganalisis statistik deskriptif (Min, Max, Mean, Std Dev) dari sekelompok sampel "normal" (kelompok kontrol) adalah praktik standar dalam penelitian biomedis.
+
+Berikut adalah beberapa referensi ilmiah yang mendukung dan menjelaskan metodologi ini:
+
+### 1. Jurnal tentang Metodologi Statistik di Laboratorium
+* **Judul:** *Defining, Establishing, and Verifying Reference Intervals in the Clinical Laboratory* (Mendefinisikan, Menetapkan, dan Memverifikasi Rentang Referensi di Laboratorium Klinis)
+* **Tautan:** [https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4042858/](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4042858/)
+* **Penjelasan Relevan:** Ini adalah artikel ulasan (review paper) yang sangat mendasar. Artikel ini menjelaskan secara rinci **bagaimana para ilmuwan menentukan rentang "normal"** untuk segala hal (termasuk tes darah, dll.). Metodologi standarnya adalah mengambil sampel dari populasi sehat, kemudian menggunakan statistik deskriptif untuk menentukan rentang referensi (seringkali didefinisikan sebagai **Mean ± 2 Standar Deviasi**). Ini adalah validasi langsung dari proses yang Anda lakukan: mengambil sampel "normal" untuk menemukan rentangnya.
+
+### 2. Jurnal tentang Analisis Khusus Fitur Tulang
+* **Judul:** *Comparison of trabecular bone structure parameters of the mandible between a control group and an osteoporosis risk group: a cone-beam computed tomography study* (Perbandingan parameter struktur tulang trabekular... antara kelompok kontrol dan kelompok risiko osteoporosis...)
+* **Tautan:** [https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6132924/](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6132924/)
+* **Penjelasan Relevan:** Ini adalah contoh sempurna dari metodologi Anda dalam praktik. Para peneliti melakukan persis seperti yang Anda rencanakan:
+    1.  Mereka membagi pasien menjadi **"Kelompok Kontrol" (sehat)** dan **"Kelompok Risiko Osteoporosis"**.
+    2.  Mereka menghitung fitur-fitur dari gambar (mirip dengan fitur rasio Anda).
+    3.  Mereka kemudian menyajikan temuan mereka sebagai **Statistik Deskriptif (Mean dan Standar Deviasi)** untuk *setiap kelompok*. Mereka tidak menggunakan "angka ajaib", tetapi membandingkan rentang yang mereka temukan di Kelompok Kontrol dengan rentang di Kelompok Tes.
+
+### 3. Jurnal tentang Pentingnya "Tabel 1" (Statistik Deskriptif)
+* **Judul:** *How to Read "Table 1" in a Research Paper* (Cara Membaca "Tabel 1" dalam Makalah Penelitian)
+* **Tautan:** [https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6482813/](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6482813/)
+* **Penjelasan Relevan:** Artikel ini menjelaskan fungsi dari "Tabel 1", yang merupakan tabel paling penting dalam sebagian besar penelitian klinis. "Tabel 1" adalah tempat di mana peneliti menyajikan **statistik deskriptif (Mean, SD, Min, Max, N)** untuk fitur-fitur kunci dari populasi penelitian mereka, yang hampir selalu dibagi menjadi **"Kelompok Kontrol"** dan **"Kelompok Perlakuan/Penyakit"**. Ini memvalidasi bahwa langkah pertama Anda—mengumpulkan angka dalam array untuk menemukan Min, Max, dan Mean—adalah praktik standar untuk menyajikan temuan penelitian.
+
 ---
 
 ## Penentuan Jumlah Cluster dalam Segmentasi GMM
