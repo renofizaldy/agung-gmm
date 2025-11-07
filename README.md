@@ -238,7 +238,7 @@ Rekomendasi umumnya adalah memulai analisis dengan **3 cluster** sebagai asumsi 
 
 ---
 
-## Metodologi Segmentasi Citra Kepadatan Tulang Menggunakan Gaussian Mixture Models (GMM)
+## Flowchart Implementasi Gaussian Mixture Models (GMM) - Expectation-Maximization (EM)
 
 Untuk menganalisis dan mengekstrak area kepadatan tulang dari citra digital, metodologi 8 langkah berikut telah dirumuskan. Proses ini menggunakan algoritma Gaussian Mixture Models (GMM) untuk mengelompokkan piksel berdasarkan intensitasnya.
 
