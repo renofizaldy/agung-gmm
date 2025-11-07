@@ -94,7 +94,7 @@ Rekomendasi umumnya adalah memulai analisis dengan **3 cluster** sebagai asumsi 
 
 Untuk menganalisis dan mengekstrak area kepadatan tulang dari citra digital, metodologi 8 langkah berikut telah dirumuskan. Proses ini menggunakan algoritma Gaussian Mixture Models (GMM) untuk mengelompokkan piksel berdasarkan intensitasnya.
 
-![image](https://res.cloudinary.com/enterz/image/upload/v1762502851/SlimeNews/GMM-EM.png)
+![image](https://res.cloudinary.com/enterz/image/upload/v1762503275/SlimeNews/GMM-EM2.png)
 
 **1. Akuisisi Data (Input Citra)**
 
