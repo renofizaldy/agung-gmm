@@ -5,7 +5,7 @@ Install library untuk extract_fitur:
 `pip3 install pandas scikit-image opencv-python-headless scikit-learn matplotlib`
 
 Jalankan aplikasi:
-`python3 gui.py`
+`python3 4-gui-fitur.py`
 
 ---
 
