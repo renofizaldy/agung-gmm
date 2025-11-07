@@ -46,6 +46,93 @@ Secara singkat, fungsi **GMM-EM** dalam skrip ini adalah untuk **mengelompokkan 
 
 ---
 
+## Penentuan Jumlah Cluster dalam Segmentasi GMM
+
+Tujuan dari penentuan jumlah cluster (misalnya, 3 atau 4) dalam Gaussian Mixture Models (GMM) adalah untuk menginstruksikan algoritma mengenai jumlah kelompok kepadatan berbeda yang harus diidentifikasi di dalam citra X-ray. Pengaturan parameter ini bersifat krusial karena akan secara langsung memengaruhi hasil segmentasi citra.
+
+### Skenario 3 Cluster
+
+Skenario 3 cluster merupakan pendekatan awal yang paling logis dan sederhana. Dalam konfigurasi ini, GMM membagi semua piksel citra menjadi tiga kelompok utama berdasarkan intensitasnya:
+
+* **Cluster 1 (Kepadatan Paling Rendah / Hitam):** Merepresentasikan **latar belakang** (background) atau udara. Piksel-piksel ini tidak memiliki informasi kepadatan tulang dan harus diisolasi agar tidak mengganggu kalkulasi fitur.
+* **Cluster 2 (Kepadatan Menengah / Abu-abu):** Merepresentasikan **tulang berpori (trabekular)**. Area ini juga dapat mencakup jaringan lunak (otot/lemak) yang memiliki atenuasi sinar-X serupa.
+* **Cluster 3 (Kepadatan Paling Tinggi / Putih):** Merepresentasikan **tulang padat (kortikal)**. Ini adalah area dengan kepadatan radiografi tertinggi.
+
+**Keuntungan:** Model ini secara efisien menyediakan dua komponen tulang esensial (`Piksel Padat` dan `Piksel Berpori`) yang diperlukan untuk perhitungan fitur rasio.
+
+#### Justifikasi Logis untuk 3 Cluster
+
+Alasan paling logis untuk menggunakan 3 cluster adalah karena citra X-ray tulang secara fisik memiliki tiga "area" kepadatan utama yang berbeda dan relevan untuk analisis. Pemisahan ini mutlak diperlukan untuk mengekstrak fitur rasio kunci, seperti `rasio_padat_vs_berpori`, yang formulanya adalah:
+
+`(Jumlah Piksel Padat) / (Jumlah Piksel Berpori)`
+
+Untuk menghitung rasio ini, diperlukan tiga kelompok data:
+
+1.  Satu kelompok untuk **Piksel Padat** (dari Cluster 3 / Putih).
+2.  Satu kelompok untuk **Piksel Berpori** (dari Cluster 2 / Abu-abu).
+3.  Satu kelompok untuk **Latar Belakang** (dari Cluster 1 / Hitam) yang harus dieliminasi dari perhitungan.
+
+Dengan demikian, penggunaan 3 cluster adalah jumlah minimum yang logis dan diperlukan untuk mengekstrak dua komponen utama dalam formula fitur rasio tersebut.
+
+### Skenario 4 Cluster (Alternatif)
+
+Skenario 4 cluster dapat dipertimbangkan jika skenario 3 cluster dinilai terlalu sederhana, terutama jika terjadi percampuran signifikan antara jaringan lunak dan tulang berpori dalam satu cluster (Cluster 2).
+
+Dengan memilih 4 cluster, GMM dapat memisahkan komponen-komponen ini dengan lebih detail:
+
+* **Cluster 1 (Paling Gelap):** Latar Belakang / Udara.
+* **Cluster 2 (Abu-abu Gelap):** Jaringan Lunak (Otot, Lemak).
+* **Cluster 3 (Abu-abu Terang):** Tulang Berpori (Trabekular).
+* **Cluster 4 (Paling Terang):** Tulang Padat (Kortikal).
+
+**Keuntungan:** Pendekatan ini berpotensi menghasilkan segmentasi tulang yang lebih "bersih" dan akurat dengan mengisolasi jaringan lunak yang dapat mengganggu.
+
+### Pertimbangan Metodologis
+
+Rekomendasi umumnya adalah memulai analisis dengan **3 cluster** sebagai asumsi dasar. Jika hasil segmentasi visual menunjukkan bahwa cluster tulang berpori (trabekular) terlihat jelas tercampur dengan jaringan lunak di sekitarnya, eksperimen dapat dilanjutkan dengan meningkatkan jumlah cluster menjadi **4** untuk mengevaluasi apakah pemisahan yang lebih baik dapat dicapai.
+
+---
+
+## Flowchart Implementasi Gaussian Mixture Models (GMM) - Expectation-Maximization (EM)
+
+Untuk menganalisis dan mengekstrak area kepadatan tulang dari citra digital, metodologi 8 langkah berikut telah dirumuskan. Proses ini menggunakan algoritma Gaussian Mixture Models (GMM) untuk mengelompokkan piksel berdasarkan intensitasnya.
+
+![image](https://res.cloudinary.com/enterz/image/upload/v1762502851/SlimeNews/GMM-EM.png)
+
+**1. Akuisisi Data (Input Citra)**
+
+Langkah paling awal dalam alur kerja ini adalah akuisisi data. Dalam konteks ini, data merupakan citra digital mentah (misalnya, format .jpg atau .png) yang akan menjadi subjek analisis.
+
+**2. Pra-pemrosesan: Konversi Grayscale**
+
+Model GMM memerlukan fitur tunggal untuk setiap titik data (piksel). Oleh karena itu, citra input harus melalui pra-pemrosesan, di mana ia dikonversi dari ruang warna RGB (3 saluran) menjadi grayscale (1 saluran). Saluran tunggal ini merepresentasikan fitur intensitas (kecerahan), yang menjadi dasar untuk pengelompokan.
+
+**3. Inisialisasi Model GMM**
+
+Pada tahap ini, model probabilistik GMM disiapkan. Sebuah hyperparameter kunci, n_components (jumlah cluster), diatur ke 3. Pengaturan ini didasarkan pada asumsi apriori bahwa citra terdiri dari tiga komponen utama yang dapat dipisahkan secara statistik: tulang (intensitas tinggi), jaringan lunak (intensitas sedang), dan latar belakang (intensitas rendah).
+
+**4. Pelatihan Model (Algoritma EM)**
+
+Proses fitting model (gmm.fit()) dieksekusi menggunakan seluruh set data piksel grayscale. Di balik layar, Algoritma Expectation-Maximization (EM) bekerja secara iteratif. Tujuannya adalah untuk menemukan parameter optimal (khususnya gmm.means_ atau rata-rata intensitas) untuk setiap 3 cluster Gaussian agar paling sesuai dengan distribusi data.
+
+**5. Segmentasi Awal (Prediksi Cluster)**
+
+Setelah model dilatih, model tersebut digunakan untuk mengklasifikasikan setiap piksel dalam citra. Fungsi gmm.predict() menetapkan setiap piksel ke cluster yang paling mungkin (memberi label 0, 1, atau 2). Penting untuk dicatat bahwa GMM tidak menjamin urutan label ini; label '0' mungkin tidak selalu mewakili cluster tergelap.
+
+**6. Standardisasi Label: Analisis Mean**
+
+Untuk memastikan konsistensi hasil dan interpretabilitas, label cluster perlu distandarisasi. Rata-rata intensitas (gmm.means_) dari setiap cluster yang ditemukan diekstrak. Dengan menggunakan fungsi np.argsort(), sebuah "peta" pengurutan dibuat untuk mengidentifikasi indeks cluster dari yang tergelap (intensitas terendah) hingga yang terterang (intensitas tertinggi).
+
+**7. Pemetaan Ulang (Re-mapping) Label**
+
+"Peta" dari langkah 6 kini diterapkan. Sebuah array baru (sorted_labels) dibuat. Dengan melakukan iterasi pada peta, setiap piksel di gambar diberi label baru yang konsisten (misal, 0 untuk latar belakang/gelap, 1 untuk jaringan/sedang, 2 untuk tulang/terang). Proses ini memastikan bahwa label '2', misalnya, secara konsisten mewakili cluster dengan intensitas tertinggi di setiap gambar yang diuji.
+
+**8. Hasil Segmentasi Gambar**
+
+Sebagai langkah akhir, array label 1D (sorted_labels) dibentuk kembali (reshape) ke dimensi spasial 2D citra asli. Hasilnya kemudian divisualisasikan. Output ini berfungsi sebagai validasi visual dari keberhasilan proses segmentasi, yang menampilkan gambar di mana setiap komponen (tulang, jaringan, dan latar belakang) telah dipisahkan ke dalam kelasnya masing-masing.
+
+---
+
 ## Penentuan Fitur atau Klasifikasi
 
 ### 1. rasio_total_tulang_terhadap_gambar
@@ -188,90 +275,3 @@ Pendekatan metodologis untuk menetapkan rentang patokan (baseline) melalui anali
 * **Judul:** *How to Read "Table 1" in a Research Paper* (Cara Membaca "Tabel 1" dalam Makalah Penelitian)
 * **Tautan:** [https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6482813/](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6482813/)
 * **Penjelasan Relevan:** Artikel ini menguraikan fungsi "Tabel 1", sebuah komponen standar dalam publikasi penelitian klinis. "Tabel 1" umumnya menyajikan **statistik deskriptif (Mean, SD, Min, Max, N)** untuk fitur-fitur kunci dari populasi penelitian, yang disajikan secara terpisah untuk **"Kelompok Kontrol"** dan **"Kelompok Perlakuan/Penyakit"**. Praktik ini memvalidasi langkah pengumpulan data fitur ke dalam array untuk analisis Min, Max, dan Mean sebagai prosedur standar dalam penyajian temuan penelitian.
-
----
-
-## Penentuan Jumlah Cluster dalam Segmentasi GMM
-
-Tujuan dari penentuan jumlah cluster (misalnya, 3 atau 4) dalam Gaussian Mixture Models (GMM) adalah untuk menginstruksikan algoritma mengenai jumlah kelompok kepadatan berbeda yang harus diidentifikasi di dalam citra X-ray. Pengaturan parameter ini bersifat krusial karena akan secara langsung memengaruhi hasil segmentasi citra.
-
-### Skenario 3 Cluster
-
-Skenario 3 cluster merupakan pendekatan awal yang paling logis dan sederhana. Dalam konfigurasi ini, GMM membagi semua piksel citra menjadi tiga kelompok utama berdasarkan intensitasnya:
-
-* **Cluster 1 (Kepadatan Paling Rendah / Hitam):** Merepresentasikan **latar belakang** (background) atau udara. Piksel-piksel ini tidak memiliki informasi kepadatan tulang dan harus diisolasi agar tidak mengganggu kalkulasi fitur.
-* **Cluster 2 (Kepadatan Menengah / Abu-abu):** Merepresentasikan **tulang berpori (trabekular)**. Area ini juga dapat mencakup jaringan lunak (otot/lemak) yang memiliki atenuasi sinar-X serupa.
-* **Cluster 3 (Kepadatan Paling Tinggi / Putih):** Merepresentasikan **tulang padat (kortikal)**. Ini adalah area dengan kepadatan radiografi tertinggi.
-
-**Keuntungan:** Model ini secara efisien menyediakan dua komponen tulang esensial (`Piksel Padat` dan `Piksel Berpori`) yang diperlukan untuk perhitungan fitur rasio.
-
-#### Justifikasi Logis untuk 3 Cluster
-
-Alasan paling logis untuk menggunakan 3 cluster adalah karena citra X-ray tulang secara fisik memiliki tiga "area" kepadatan utama yang berbeda dan relevan untuk analisis. Pemisahan ini mutlak diperlukan untuk mengekstrak fitur rasio kunci, seperti `rasio_padat_vs_berpori`, yang formulanya adalah:
-
-`(Jumlah Piksel Padat) / (Jumlah Piksel Berpori)`
-
-Untuk menghitung rasio ini, diperlukan tiga kelompok data:
-
-1.  Satu kelompok untuk **Piksel Padat** (dari Cluster 3 / Putih).
-2.  Satu kelompok untuk **Piksel Berpori** (dari Cluster 2 / Abu-abu).
-3.  Satu kelompok untuk **Latar Belakang** (dari Cluster 1 / Hitam) yang harus dieliminasi dari perhitungan.
-
-Dengan demikian, penggunaan 3 cluster adalah jumlah minimum yang logis dan diperlukan untuk mengekstrak dua komponen utama dalam formula fitur rasio tersebut.
-
-### Skenario 4 Cluster (Alternatif)
-
-Skenario 4 cluster dapat dipertimbangkan jika skenario 3 cluster dinilai terlalu sederhana, terutama jika terjadi percampuran signifikan antara jaringan lunak dan tulang berpori dalam satu cluster (Cluster 2).
-
-Dengan memilih 4 cluster, GMM dapat memisahkan komponen-komponen ini dengan lebih detail:
-
-* **Cluster 1 (Paling Gelap):** Latar Belakang / Udara.
-* **Cluster 2 (Abu-abu Gelap):** Jaringan Lunak (Otot, Lemak).
-* **Cluster 3 (Abu-abu Terang):** Tulang Berpori (Trabekular).
-* **Cluster 4 (Paling Terang):** Tulang Padat (Kortikal).
-
-**Keuntungan:** Pendekatan ini berpotensi menghasilkan segmentasi tulang yang lebih "bersih" dan akurat dengan mengisolasi jaringan lunak yang dapat mengganggu.
-
-### Pertimbangan Metodologis
-
-Rekomendasi umumnya adalah memulai analisis dengan **3 cluster** sebagai asumsi dasar. Jika hasil segmentasi visual menunjukkan bahwa cluster tulang berpori (trabekular) terlihat jelas tercampur dengan jaringan lunak di sekitarnya, eksperimen dapat dilanjutkan dengan meningkatkan jumlah cluster menjadi **4** untuk mengevaluasi apakah pemisahan yang lebih baik dapat dicapai.
-
----
-
-## Flowchart Implementasi Gaussian Mixture Models (GMM) - Expectation-Maximization (EM)
-
-Untuk menganalisis dan mengekstrak area kepadatan tulang dari citra digital, metodologi 8 langkah berikut telah dirumuskan. Proses ini menggunakan algoritma Gaussian Mixture Models (GMM) untuk mengelompokkan piksel berdasarkan intensitasnya.
-
-![image](https://res.cloudinary.com/enterz/image/upload/v1762502851/SlimeNews/GMM-EM.png)
-
-**1. Akuisisi Data (Input Citra)**
-
-Langkah paling awal dalam alur kerja ini adalah akuisisi data. Dalam konteks ini, data merupakan citra digital mentah (misalnya, format .jpg atau .png) yang akan menjadi subjek analisis.
-
-**2. Pra-pemrosesan: Konversi Grayscale**
-
-Model GMM memerlukan fitur tunggal untuk setiap titik data (piksel). Oleh karena itu, citra input harus melalui pra-pemrosesan, di mana ia dikonversi dari ruang warna RGB (3 saluran) menjadi grayscale (1 saluran). Saluran tunggal ini merepresentasikan fitur intensitas (kecerahan), yang menjadi dasar untuk pengelompokan.
-
-**3. Inisialisasi Model GMM**
-
-Pada tahap ini, model probabilistik GMM disiapkan. Sebuah hyperparameter kunci, n_components (jumlah cluster), diatur ke 3. Pengaturan ini didasarkan pada asumsi apriori bahwa citra terdiri dari tiga komponen utama yang dapat dipisahkan secara statistik: tulang (intensitas tinggi), jaringan lunak (intensitas sedang), dan latar belakang (intensitas rendah).
-
-**4. Pelatihan Model (Algoritma EM)**
-
-Proses fitting model (gmm.fit()) dieksekusi menggunakan seluruh set data piksel grayscale. Di balik layar, Algoritma Expectation-Maximization (EM) bekerja secara iteratif. Tujuannya adalah untuk menemukan parameter optimal (khususnya gmm.means_ atau rata-rata intensitas) untuk setiap 3 cluster Gaussian agar paling sesuai dengan distribusi data.
-
-**5. Segmentasi Awal (Prediksi Cluster)**
-
-Setelah model dilatih, model tersebut digunakan untuk mengklasifikasikan setiap piksel dalam citra. Fungsi gmm.predict() menetapkan setiap piksel ke cluster yang paling mungkin (memberi label 0, 1, atau 2). Penting untuk dicatat bahwa GMM tidak menjamin urutan label ini; label '0' mungkin tidak selalu mewakili cluster tergelap.
-
-**6. Standardisasi Label: Analisis Mean**
-
-Untuk memastikan konsistensi hasil dan interpretabilitas, label cluster perlu distandarisasi. Rata-rata intensitas (gmm.means_) dari setiap cluster yang ditemukan diekstrak. Dengan menggunakan fungsi np.argsort(), sebuah "peta" pengurutan dibuat untuk mengidentifikasi indeks cluster dari yang tergelap (intensitas terendah) hingga yang terterang (intensitas tertinggi).
-
-**7. Pemetaan Ulang (Re-mapping) Label**
-
-"Peta" dari langkah 6 kini diterapkan. Sebuah array baru (sorted_labels) dibuat. Dengan melakukan iterasi pada peta, setiap piksel di gambar diberi label baru yang konsisten (misal, 0 untuk latar belakang/gelap, 1 untuk jaringan/sedang, 2 untuk tulang/terang). Proses ini memastikan bahwa label '2', misalnya, secara konsisten mewakili cluster dengan intensitas tertinggi di setiap gambar yang diuji.
-
-**8. Hasil Segmentasi Gambar**
-
-Sebagai langkah akhir, array label 1D (sorted_labels) dibentuk kembali (reshape) ke dimensi spasial 2D citra asli. Hasilnya kemudian divisualisasikan. Output ini berfungsi sebagai validasi visual dari keberhasilan proses segmentasi, yang menampilkan gambar di mana setiap komponen (tulang, jaringan, dan latar belakang) telah dipisahkan ke dalam kelasnya masing-masing.
