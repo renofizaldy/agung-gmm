@@ -1,8 +1,5 @@
-Install library untuk raw dan gui:
-`pip3 install opencv-python-headless scikit-learn matplotlib`
-
-Install library untuk extract_fitur:
-`pip3 install pandas scikit-image opencv-python-headless scikit-learn matplotlib`
+Install library:
+`pip3 install opencv-python-headless scikit-learn matplotlib pandas scikit-image opencv-python-headless scikit-learn matplotlib`
 
 Jalankan aplikasi:
 `python3 4-gui-fitur.py`
