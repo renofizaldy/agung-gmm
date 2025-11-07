@@ -235,3 +235,43 @@ Dengan memilih 4 cluster, GMM dapat memisahkan komponen-komponen ini dengan lebi
 ### Pertimbangan Metodologis
 
 Rekomendasi umumnya adalah memulai analisis dengan **3 cluster** sebagai asumsi dasar. Jika hasil segmentasi visual menunjukkan bahwa cluster tulang berpori (trabekular) terlihat jelas tercampur dengan jaringan lunak di sekitarnya, eksperimen dapat dilanjutkan dengan meningkatkan jumlah cluster menjadi **4** untuk mengevaluasi apakah pemisahan yang lebih baik dapat dicapai.
+
+---
+
+## Metodologi Segmentasi Citra Kepadatan Tulang Menggunakan Gaussian Mixture Models (GMM)
+
+Untuk menganalisis dan mengekstrak area kepadatan tulang dari citra digital, metodologi 8 langkah berikut telah dirumuskan. Proses ini menggunakan algoritma Gaussian Mixture Models (GMM) untuk mengelompokkan piksel berdasarkan intensitasnya.
+
+![image](https://res.cloudinary.com/enterz/image/upload/v1762502851/SlimeNews/GMM-EM.png)
+
+**1. Akuisisi Data (Input Citra)**
+
+Langkah paling awal dalam alur kerja ini adalah akuisisi data. Dalam konteks ini, data merupakan citra digital mentah (misalnya, format .jpg atau .png) yang akan menjadi subjek analisis.
+
+**2. Pra-pemrosesan: Konversi Grayscale**
+
+Model GMM memerlukan fitur tunggal untuk setiap titik data (piksel). Oleh karena itu, citra input harus melalui pra-pemrosesan, di mana ia dikonversi dari ruang warna RGB (3 saluran) menjadi grayscale (1 saluran). Saluran tunggal ini merepresentasikan fitur intensitas (kecerahan), yang menjadi dasar untuk pengelompokan.
+
+**3. Inisialisasi Model GMM**
+
+Pada tahap ini, model probabilistik GMM disiapkan. Sebuah hyperparameter kunci, n_components (jumlah cluster), diatur ke 3. Pengaturan ini didasarkan pada asumsi apriori bahwa citra terdiri dari tiga komponen utama yang dapat dipisahkan secara statistik: tulang (intensitas tinggi), jaringan lunak (intensitas sedang), dan latar belakang (intensitas rendah).
+
+**4. Pelatihan Model (Algoritma EM)**
+
+Proses fitting model (gmm.fit()) dieksekusi menggunakan seluruh set data piksel grayscale. Di balik layar, Algoritma Expectation-Maximization (EM) bekerja secara iteratif. Tujuannya adalah untuk menemukan parameter optimal (khususnya gmm.means_ atau rata-rata intensitas) untuk setiap 3 cluster Gaussian agar paling sesuai dengan distribusi data.
+
+**5. Segmentasi Awal (Prediksi Cluster)**
+
+Setelah model dilatih, model tersebut digunakan untuk mengklasifikasikan setiap piksel dalam citra. Fungsi gmm.predict() menetapkan setiap piksel ke cluster yang paling mungkin (memberi label 0, 1, atau 2). Penting untuk dicatat bahwa GMM tidak menjamin urutan label ini; label '0' mungkin tidak selalu mewakili cluster tergelap.
+
+**6. Standardisasi Label: Analisis Mean**
+
+Untuk memastikan konsistensi hasil dan interpretabilitas, label cluster perlu distandarisasi. Rata-rata intensitas (gmm.means_) dari setiap cluster yang ditemukan diekstrak. Dengan menggunakan fungsi np.argsort(), sebuah "peta" pengurutan dibuat untuk mengidentifikasi indeks cluster dari yang tergelap (intensitas terendah) hingga yang terterang (intensitas tertinggi).
+
+**7. Pemetaan Ulang (Re-mapping) Label**
+
+"Peta" dari langkah 6 kini diterapkan. Sebuah array baru (sorted_labels) dibuat. Dengan melakukan iterasi pada peta, setiap piksel di gambar diberi label baru yang konsisten (misal, 0 untuk latar belakang/gelap, 1 untuk jaringan/sedang, 2 untuk tulang/terang). Proses ini memastikan bahwa label '2', misalnya, secara konsisten mewakili cluster dengan intensitas tertinggi di setiap gambar yang diuji.
+
+**8. Hasil Segmentasi Gambar**
+
+Sebagai langkah akhir, array label 1D (sorted_labels) dibentuk kembali (reshape) ke dimensi spasial 2D citra asli. Hasilnya kemudian divisualisasikan. Output ini berfungsi sebagai validasi visual dari keberhasilan proses segmentasi, yang menampilkan gambar di mana setiap komponen (tulang, jaringan, dan latar belakang) telah dipisahkan ke dalam kelasnya masing-masing.
