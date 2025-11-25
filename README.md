@@ -1,5 +1,5 @@
 Install library:
-`pip3 install opencv-python-headless scikit-learn matplotlib pandas scikit-image opencv-python-headless scikit-learn matplotlib`
+`pip3 install opencv-python opencv-python-headless scikit-learn matplotlib pandas scikit-image`
 
 Jalankan aplikasi:
 `python3 4-gui-fitur.py`
