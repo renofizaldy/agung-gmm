@@ -77,10 +77,9 @@ def run_analysis(image_path, n_clusters=3):
         # 2. Tambahkan nama file ke string teks
         fitur_text = (
             f"File: {file_name}\n"
-            f"--- Hasil Fitur Rasio (Analisis Manual) ---\n"
-            f"1. Rasio Total Tulang (B.Ar/T.Ar): {rasio_total_tulang_terhadap_gambar:.4f}\n"
-            f"2. Rasio Padat / Total Tulang (%Ct.Ar): {rasio_tulang_padat_terhadap_total_tulang:.4f}\n"
-            f"3. Rasio Padat vs Berpori (Ct/Cn Ratio): {rasio_padat_vs_berpori:.4f}"
+            f"1. Rasio Total Tulang: {rasio_total_tulang_terhadap_gambar:.4f}\n"
+            f"2. Rasio Padat / Total Tulang: {rasio_tulang_padat_terhadap_total_tulang:.4f}\n"
+            f"3. Rasio Padat vs Berpori: {rasio_padat_vs_berpori:.4f}"
         )
 
         # Menampilkan hasil menggunakan Matplotlib
