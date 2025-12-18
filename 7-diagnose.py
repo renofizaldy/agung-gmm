@@ -44,11 +44,11 @@ def load_dataset_knowledge():
 
     # 3. Validasi jumlah data (Minimal 5 data total)
     if total_data < 5:
-        return False, f"Data belum cukup pintar!\nHanya ditemukan {total_data} data.\nKumpulkan minimal 5-10 data gambar dulu."
+        return False, f"Data belum cukup!\nHanya ditemukan {total_data} data.\nKumpulkan minimal 5-10 data latih dulu."
 
     # 4. Buat Rangkuman Statistik (Min, Max, Mean) untuk tiap kategori
     knowledge_base = {}
-    print("\n--- INFO KECERDASAN DOKTER ---")
+    print("\n--- INFO STATISTIK ---")
     for label, values in data_store.items():
         if len(values) > 0:
             knowledge_base[label] = {
@@ -95,13 +95,12 @@ def diagnose_image(image_path, knowledge_base):
 
     # --- Langkah B: ALGORITMA PENGAMBILAN KEPUTUSAN ---
     # Logika: Cek apakah nilai masuk range Min-Max salah satu kategori
-    
     hasil_diagnosa = "TIDAK DIKETAHUI / SUSPECT"
     jarak_terdekat = float('inf')
     
     matches = []
 
-    print(f"\nAnalisis Pasien Baru: Nilai = {nilai_pasien:.4f}")
+    print(f"\nAnalisis Citra Baru: Nilai = {nilai_pasien:.4f}")
 
     # Cek 1: Apakah masuk Range Pasti?
     for label, stats in knowledge_base.items():
@@ -142,13 +141,13 @@ def start_doctor_check():
     success, result = load_dataset_knowledge()
     
     if not success:
-        messagebox.showwarning("Dokter Belum Siap", result)
+        messagebox.showwarning("Aplikasi Belum Siap", result)
         return
 
     knowledge_base = result
     
     # 2. Pilih Gambar Pasien
-    file_path = filedialog.askopenfilename(title="Pilih Gambar Pasien X-ray")
+    file_path = filedialog.askopenfilename(title="Pilih Citra X-ray")
     if not file_path: return
 
     # 3. Lakukan Diagnosa
@@ -158,7 +157,7 @@ def start_doctor_check():
     if nilai is not None:
         # Siapkan Teks Laporan
         report_text = (
-            f"HASIL PEMERIKSAAN DOKTER DIGITAL\n"
+            f"HASIL DIAGNOSIS\n"
             f"================================\n"
             f"Nama File: {os.path.basename(file_path)}\n"
             f"Nilai Rasio Tulang: {nilai:.4f}\n"
@@ -173,7 +172,7 @@ def start_doctor_check():
         plt.figure(figsize=(10, 6))
         
         plt.subplot(1, 2, 1)
-        plt.title("Rontgen Pasien")
+        plt.title("Rontgen Citra")
         plt.imshow(img_asli, cmap='gray')
         plt.axis('off')
         
@@ -184,14 +183,14 @@ def start_doctor_check():
         
         plt.tight_layout(rect=[0, 0, 1, 0.85])
         plt.figtext(0.5, 0.88, report_text, 
-                    ha='center', va='top', fontsize=11, 
+                    ha='center', va='top', fontsize=11,
                     bbox={"facecolor":"#ffdddd" if "Osteo" in diagnosa else "#ddffdd", "alpha":1, "pad":10})
         
         plt.show()
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title("Aplikasi Dokter Digital (AI Diagnosis)")
+    root.title("Diagnosis Citra")
     root.geometry("400x200")
     style = ttk.Style(root)
     style.theme_use('clam')
@@ -199,13 +198,13 @@ if __name__ == "__main__":
     main_frame = ttk.Frame(root, padding="20")
     main_frame.pack(expand=True, fill="both")
     
-    lbl_title = ttk.Label(main_frame, text="Sistem Pakar Diagnosa Tulang", font=("Arial", 14, "bold"))
+    lbl_title = ttk.Label(main_frame, text="Diagnosis Citra", font=("Arial", 14, "bold"))
     lbl_title.pack(pady=10)
 
-    lbl_desc = ttk.Label(main_frame, text="Sistem akan membaca 'database_fitur.csv'\ndan mencocokkan pasien baru.", justify="center")
+    lbl_desc = ttk.Label(main_frame, text="Sistem akan membaca 'database_fitur.csv'\ndan mencocokkan citra baru.", justify="center")
     lbl_desc.pack(pady=5)
 
-    btn_action = ttk.Button(main_frame, text="👨‍⚕️ Mulai Pemeriksaan Pasien", command=start_doctor_check)
+    btn_action = ttk.Button(main_frame, text="Mulai Pemeriksaan Citra", command=start_doctor_check)
     btn_action.pack(pady=20, ipady=10, fill='x')
 
     root.mainloop()
