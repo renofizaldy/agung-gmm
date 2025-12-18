@@ -144,7 +144,7 @@ def select_image_and_run():
 # --- Setup Jendela Utama GUI ---
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title("Tool Pengumpul Data Dataset Tulang")
+    root.title("Training Data Latih")
     root.geometry("450x250") # Diperbesar sedikit
     root.resizable(False, False) 
 
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     ttk.Separator(main_frame, orient='horizontal').pack(fill='x', pady=15)
 
     # --- Bagian Tombol ---
-    lbl_action = ttk.Label(main_frame, text="Langkah 2: Pilih File Gambar", font=("Arial", 10))
+    lbl_action = ttk.Label(main_frame, text="Langkah 2: Pilih File Gambar", font=("Arial", 10, "bold"))
     lbl_action.pack(pady=(0, 5))
 
     status_label = ttk.Label(main_frame, text="Menunggu input...", justify="center", foreground="gray")

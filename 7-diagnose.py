@@ -10,9 +10,6 @@ import matplotlib.pyplot as plt
 import os
 import csv 
 
-# ==========================================================
-# BAGIAN 1: OTAK DOKTER (MEMBACA DATASET)
-# ==========================================================
 def load_dataset_knowledge():
     filename = "database_fitur.csv"
     
@@ -63,9 +60,6 @@ def load_dataset_knowledge():
 
     return True, knowledge_base
 
-# ==========================================================
-# BAGIAN 2: PROSES DIAGNOSA
-# ==========================================================
 def diagnose_image(image_path, knowledge_base):
     # --- Langkah A: Segmentasi & Hitung Fitur (Sama seperti sebelumnya) ---
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
@@ -133,9 +127,6 @@ def diagnose_image(image_path, knowledge_base):
 
     return nilai_pasien, img, segmented_image, hasil_diagnosa
 
-# ==========================================================
-# BAGIAN 3: GUI & INTERAKSI
-# ==========================================================
 def start_doctor_check():
     # 1. Load Pengetahuan dulu
     success, result = load_dataset_knowledge()
