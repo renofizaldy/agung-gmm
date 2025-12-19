@@ -171,11 +171,17 @@ def start_doctor_check():
         plt.title(f"Visualisasi Area ({diagnosa})")
         plt.imshow(img_seg, cmap='viridis')
         plt.axis('off')
-        
+
+        bg_color = "#ddffdd"
+        if "Osteoporosis" in diagnosa:
+            bg_color = "#ffdddd"
+        elif "Osteopenia" in diagnosa:
+            bg_color = "#fff4cc"
+
         plt.tight_layout(rect=[0, 0, 1, 0.85])
-        plt.figtext(0.5, 0.88, report_text, 
+        plt.figtext(0.5, 0.88, report_text,
                     ha='center', va='top', fontsize=11,
-                    bbox={"facecolor":"#ffdddd" if "Osteo" in diagnosa else "#ddffdd", "alpha":1, "pad":10})
+                    bbox={"facecolor":bg_color, "alpha":1, "pad":10})
         
         plt.show()
 

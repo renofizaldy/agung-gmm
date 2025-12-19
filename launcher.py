@@ -70,13 +70,11 @@ if __name__ == "__main__":
     
     header_frame = ttk.Frame(root, padding="10")
     header_frame.pack(fill="x")
-    
+
     lbl_title = ttk.Label(header_frame, text="Sistem Deteksi Tulang", font=("Arial", 16, "bold"))
     lbl_title.pack()
     lbl_subtitle = ttk.Label(header_frame, text="Metode Segmentasi GMM-EM", font=("Arial", 10))
     lbl_subtitle.pack()
-
-    ttk.Separator(root, orient='horizontal').pack(fill='x', padx=20, pady=5)
 
     btn_frame = ttk.Frame(root, padding="20")
     btn_frame.pack(expand=True, fill="both")
