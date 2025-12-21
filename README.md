@@ -6,6 +6,11 @@ Jalankan aplikasi:
 
 ---
 
+NORMAL: 9,24,45
+OSTEOPENIA: 38
+
+---
+
 ## Membedah Fungsi GMM-EM dalam Skrip Segmentasi Gambar
 
 Dalam analisis gambar digital, khususnya pada citra medis seperti X-ray, segmentasi adalah proses fundamental. Segmentasi gambar merujuk pada proses partisi atau pemisahan gambar digital menjadi beberapa segmen atau himpunan piksel (juga dikenal sebagai super-piksel). Tujuannya adalah untuk menyederhanakan atau mengubah representasi gambar menjadi sesuatu yang lebih bermakna dan lebih mudah untuk dianalisis.
