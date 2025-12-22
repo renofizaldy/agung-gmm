@@ -104,7 +104,7 @@ def diagnose_image(image_path, knowledge_base):
                 matches.append(label)
     
     if len(matches) == 1:
-        hasil_diagnosa = matches[0] # Cocok sempurna dengan satu kategori
+        hasil_diagnosa = matches[0]
     elif len(matches) > 1:
         # Jika overlap (masuk 2 kategori), pilih yang jarak ke Rata-ratanya paling dekat
         best_label = None
@@ -117,7 +117,7 @@ def diagnose_image(image_path, knowledge_base):
         hasil_diagnosa = best_label
     else:
         # Jika tidak masuk range manapun (Area Abu-abu), cari Rata-rata terdekat
-        # Ini logika "Nearest Neighbor"
+        # "Nearest Neighbor"
         for label, stats in knowledge_base.items():
             if stats is not None:
                 dist = abs(nilai_pasien - stats['mean'])
