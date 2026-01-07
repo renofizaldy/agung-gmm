@@ -5,14 +5,14 @@ import subprocess
 import csv
 import sys
 
-SCRIPT_TRAINING = "6-gui-fitur-csv-label.py"
-SCRIPT_DIAGNOSA = "7-diagnose.py"
+SCRIPT_TRAINING = "1-training.py"
+SCRIPT_DIAGNOSA = "3-diagnose.py"
 DATABASE_FILE   = "database_fitur.csv"
 
 def get_database_count():
     if not os.path.exists(DATABASE_FILE):
         return 0
-    
+
     try:
         with open(DATABASE_FILE, mode='r') as f:
             row_count = sum(1 for row in f)

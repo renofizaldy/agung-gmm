@@ -4,15 +4,15 @@ import cv2
 import numpy as np
 from sklearn.mixture import GaussianMixture
 import matplotlib
-matplotlib.use('TkAgg') 
+matplotlib.use('TkAgg')
 
 import matplotlib.pyplot as plt
 import os
-import csv 
+import csv
 
 def load_dataset_knowledge():
     filename = "database_fitur.csv"
-    
+
     # 1. Cek apakah file database ada
     if not os.path.exists(filename):
         return False, "Database (CSV) tidak ditemukan.\nHarap kumpulkan data dulu menggunakan Script sebelumnya."
@@ -130,7 +130,7 @@ def diagnose_image(image_path, knowledge_base):
 def start_doctor_check():
     # 1. Load Pengetahuan dulu
     success, result = load_dataset_knowledge()
-    
+
     if not success:
         messagebox.showwarning("Aplikasi Belum Siap", result)
         return
@@ -166,7 +166,7 @@ def start_doctor_check():
         plt.title("Rontgen Citra")
         plt.imshow(img_asli, cmap='gray')
         plt.axis('off')
-        
+
         plt.subplot(1, 2, 2)
         plt.title(f"Visualisasi Area ({diagnosa})")
         plt.imshow(img_seg, cmap='viridis')
