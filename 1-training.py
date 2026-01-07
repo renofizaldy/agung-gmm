@@ -179,7 +179,7 @@ def select_image_and_run():
 # --- Setup Jendela Utama GUI ---
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title("Training Data (Support Batch & CLAHE)")
+    root.title("Training Data")
     root.geometry("450x250")
     root.resizable(False, False) 
 
