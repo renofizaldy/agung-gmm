@@ -135,7 +135,7 @@ def select_image_and_run():
         messagebox.showwarning("Peringatan", "Pilih jenis Diagnosa dulu!")
         return
 
-    # 2. Buka Dialog File (BISA PILIH BANYAK / MULTIPLE)
+    # 2. Buka Dialog File
     file_paths = filedialog.askopenfilenames(
         title=f"Pilih Gambar ({selected_diagnosis})",
         filetypes=[("Image Files", "*.jpg *.jpeg *.png *.bmp *.tif"), ("All Files", "*.*")]
@@ -202,7 +202,7 @@ if __name__ == "__main__":
     ttk.Separator(main_frame, orient='horizontal').pack(fill='x', pady=15)
 
     # Tombol
-    lbl_action = ttk.Label(main_frame, text="Langkah 2: Pilih File (Bisa Banyak Sekaligus)", font=("Arial", 10))
+    lbl_action = ttk.Label(main_frame, text="Langkah 2: Pilih File", font=("Arial", 10))
     lbl_action.pack(pady=(0, 5))
 
     status_label = ttk.Label(main_frame, text="Siap menerima input...", justify="center", foreground="gray")
