@@ -16,14 +16,13 @@ import csv
 def preprocess_image(image_path):
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     if img is None: return None
-    
+
     # Terapkan CLAHE agar standar gambar sama dengan database
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
     improved_img = clahe.apply(img)
-    
+
     # Gaussian Blur tipis
     improved_img = cv2.GaussianBlur(improved_img, (3, 3), 0)
-    
     return improved_img
 
 # ==========================================================
@@ -120,7 +119,7 @@ def start_doctor_check():
     if not file_path: return
 
     nilai, img_asli, img_seg, diagnosa = diagnose_image(file_path, result)
-    
+
     if nilai is not None:
         report_text = (
             f"HASIL DIAGNOSIS\n"
@@ -171,7 +170,7 @@ if __name__ == "__main__":
 
     main_frame = ttk.Frame(root, padding="20")
     main_frame.pack(expand=True, fill="both")
-    
+
     lbl_title = ttk.Label(main_frame, text="Diagnosis Citra", font=("Arial", 14, "bold"))
     lbl_title.pack(pady=10)
 

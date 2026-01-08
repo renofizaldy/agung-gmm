@@ -5,8 +5,8 @@ import subprocess
 import csv
 import sys
 
-SCRIPT_TRAINING = "1-training.py"
-SCRIPT_DIAGNOSA = "3-diagnose.py"
+SCRIPT_TRAINING = "2-training.py"
+SCRIPT_DIAGNOSA = "4-diagnose.py"
 DATABASE_FILE   = "database_fitur.csv"
 
 def get_database_count():

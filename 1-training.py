@@ -172,7 +172,7 @@ def select_image_and_run():
     # 5. Laporan Selesai
     final_msg = f"Selesai! {success_count} dari {total_files} data berhasil disimpan."
     status_label.config(text=final_msg, foreground="green")
-    
+
     if is_silent_mode:
         messagebox.showinfo("Batch Processing Selesai", final_msg)
 
