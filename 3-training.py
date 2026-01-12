@@ -182,7 +182,8 @@ if __name__ == "__main__":
 
     ttk.Separator(main_frame, orient='horizontal').pack(fill='x', pady=15)
 
-    ttk.Label(main_frame, text="Menunggu input...", justify="center", foreground="gray").pack(pady=(0, 5))
+    status_label = ttk.Label(main_frame, text="Menunggu input...", justify="center", foreground="gray")
+    status_label.pack(pady=(0, 5))
 
     ttk.Button(main_frame, text="Pilih Gambar & Proses", command=select_image_and_run).pack(pady=10, ipady=5)
 
