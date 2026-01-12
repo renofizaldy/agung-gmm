@@ -91,7 +91,7 @@ def start_diagnosis():
         pixel_values = img.reshape(-1, 1).astype(np.float64)
         gmm = GaussianMixture(n_components=3, random_state=42).fit(pixel_values)
         labels = gmm.predict(pixel_values)
-        
+
         means = gmm.means_.flatten()
         sorted_indices = np.argsort(means)
         sorted_labels = np.zeros_like(labels)
@@ -101,13 +101,13 @@ def start_diagnosis():
 
         # Urutan nama fitur untuk DataFrame
         feature_names = [
-            'rasio_p_v_b', 'rasio_p_v_t', 'glcm_contrast', 'glcm_homogeneity', 
+            'rasio_p_v_b', 'rasio_p_v_t', 'glcm_contrast', 'glcm_homogeneity',
             'glcm_energy', 'glcm_correlation', 'stat_mean', 'stat_variance'
         ]
 
         # Ekstrak fitur
         features_new = extract_features_complete(img, segmented_image)
-        
+
         # Perbaikan: Gunakan DataFrame agar tidak muncul UserWarning tentang Feature Names
         features_df = pd.DataFrame([features_new], columns=feature_names)
 
@@ -129,7 +129,7 @@ def show_result(path, img, seg, diagnosa, prob, n_data):
         f"----------------------------------\n"
         f"Berdasarkan {n_data} Data Latih"
     )
-    
+
     bg_color = "#ddffdd" # Normal
     if "Osteoporosis" in diagnosa: bg_color = "#ffdddd"
     elif "Osteopenia" in diagnosa: bg_color = "#fff4cc"
@@ -146,7 +146,7 @@ def show_result(path, img, seg, diagnosa, prob, n_data):
     plt.axis('off')
 
     plt.tight_layout(rect=[0, 0, 1, 0.85])
-    plt.figtext(0.5, 0.88, report_text, ha='center', va='top', fontsize=11, 
+    plt.figtext(0.5, 0.88, report_text, ha='center', va='top', fontsize=11,
                 bbox={"facecolor": bg_color, "alpha": 1, "pad": 10})
     plt.show()
 
