@@ -5,13 +5,13 @@ import numpy as np
 import pandas as pd
 from sklearn.mixture import GaussianMixture
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import confusion_matrix, classification_report, accuracy_score
+from sklearn.metrics import confusion_matrix, classification_report
 from skimage.feature import graycomatrix, graycoprops
 import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import os
-import seaborn as sns # Opsional: Untuk visualisasi heatmap yang lebih bagus
+import seaborn as sns
 
 # ==========================================================
 # KONFIGURASI DAN UTILITAS
@@ -21,10 +21,8 @@ DATABASE_LATIH = "database_fitur.csv"
 LABELS_ORDER = ["Normal", "Osteopenia", "Osteoporosis"]
 
 # ==========================================================
-# BAGIAN 1: MESIN DIAGNOSA (REPLIKA DARI 5-DIAGNOSE.PY)
+# BAGIAN 1: MESIN DIAGNOSA
 # ==========================================================
-# Fungsi ini disalin agar standar penilaian sama persis dengan sistem utama
-
 def preprocess_image(image_path):
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     if img is None: return None
@@ -53,13 +51,29 @@ def extract_features_complete(img, segmented_image):
         mean_val, var_val
     ]
 
-def train_model_on_fly():
-    """Melatih model RF berdasarkan database_fitur.csv terkini"""
+def train_model_on_fly(verbose=False):
+    """Melatih model dengan fitur Debugging untuk mengecek isi database"""
     if not os.path.exists(DATABASE_LATIH):
+        if verbose: messagebox.showerror("Error", f"File database tidak ditemukan di:\n{os.path.abspath(DATABASE_LATIH)}")
         return None
+
     try:
         df = pd.read_csv(DATABASE_LATIH)
-        if len(df) < 5: return None
+        
+        # --- DEBUGGING INFO ---
+        if verbose:
+            counts = df['diagnosa'].value_counts()
+            info_msg = f"Lokasi Database:\n{os.path.abspath(DATABASE_LATIH)}\n\n"
+            info_msg += "Komposisi Data Latih Terbaca:\n"
+            for label in LABELS_ORDER:
+                n = counts.get(label, 0)
+                info_msg += f"- {label}: {n} data\n"
+            
+            messagebox.showinfo("Info Model", info_msg)
+            if len(df) < 5: 
+                messagebox.showwarning("Warning", "Data latih terlalu sedikit (<5)!")
+                return None
+        # ----------------------
         
         X = df[['rasio_p_v_b', 'rasio_p_v_t', 'glcm_contrast', 'glcm_homogeneity', 
                 'glcm_energy', 'glcm_correlation', 'stat_mean', 'stat_variance']]
@@ -68,18 +82,17 @@ def train_model_on_fly():
         clf = RandomForestClassifier(n_estimators=100, random_state=42)
         clf.fit(X, y)
         return clf
-    except Exception:
+    except Exception as e:
+        if verbose: messagebox.showerror("Error Training", f"Gagal melatih model:\n{e}")
         return None
 
 # ==========================================================
 # BAGIAN 2: LOGIKA EVALUASI BATCH
 # ==========================================================
 def run_batch_test():
-    # 1. Cek Model
-    model = train_model_on_fly()
-    if model is None:
-        messagebox.showerror("Error", "Gagal melatih model. Pastikan 'database_fitur.csv' ada dan berisi data.")
-        return
+    # 1. Cek Model (Aktifkan Verbose=True untuk melihat info database)
+    model = train_model_on_fly(verbose=False)
+    if model is None: return
 
     # 2. Ambil Input Kelas Aktual dari Dropdown
     actual_class = combo_actual.get()
@@ -109,15 +122,14 @@ def run_batch_test():
 
     for i, fpath in enumerate(file_paths):
         try:
-            # -- Proses Citra (Sama seperti 5-diagnose.py) --
             img = preprocess_image(fpath)
             if img is None: continue
 
+            # Pastikan tipe data float64 untuk konsistensi GMM
             pixel_values = img.reshape(-1, 1).astype(np.float64)
             gmm = GaussianMixture(n_components=3, random_state=42).fit(pixel_values)
             labels = gmm.predict(pixel_values)
             
-            # Sorting label GMM
             means = gmm.means_.flatten()
             sorted_indices = np.argsort(means)
             sorted_labels = np.zeros_like(labels)
@@ -125,12 +137,16 @@ def run_batch_test():
                 sorted_labels[labels == idx] = k
             segmented_image = sorted_labels.reshape(img.shape)
 
-            # Ekstrak & Prediksi
             feats = extract_features_complete(img, segmented_image)
             df_feat = pd.DataFrame([feats], columns=feature_names)
             prediction = model.predict(df_feat)[0]
 
-            # Simpan: [Nama File, Kelas Asli, Prediksi AI]
+            # Debugging: Print fitur file pertama ke Console untuk dicek manual
+            if i == 0:
+                print(f"\n[DEBUG] File: {os.path.basename(fpath)}")
+                print(f"Fitur: {feats}")
+                print(f"Prediksi: {prediction} | Kunci: {actual_class}\n")
+
             results.append({
                 'filename': os.path.basename(fpath),
                 'y_true': actual_class,
@@ -143,10 +159,8 @@ def run_batch_test():
         except Exception as e:
             print(f"Skip file {fpath}: {e}")
 
-    # 5. Simpan ke CSV Sementara (Append Mode)
     if results:
         df_res = pd.DataFrame(results)
-        # Jika file belum ada, tulis header. Jika ada, append tanpa header.
         mode = 'a' if os.path.exists(FILE_EVAL_TEMP) else 'w'
         header = not os.path.exists(FILE_EVAL_TEMP)
         df_res.to_csv(FILE_EVAL_TEMP, mode=mode, index=False, header=header)
@@ -169,7 +183,7 @@ def update_summary():
         try:
             df = pd.read_csv(FILE_EVAL_TEMP)
             counts = df['y_true'].value_counts()
-            summary_txt = "Data Terkumpul:\n"
+            summary_txt = "Data Uji Terkumpul:\n"
             for label in LABELS_ORDER:
                 n = counts.get(label, 0)
                 summary_txt += f"- {label}: {n}\n"
@@ -191,26 +205,18 @@ def calculate_metrics():
     y_true = df['y_true']
     y_pred = df['y_pred']
 
-    # --- TAHAP 1: CONFUSION MATRIX ---
     cm = confusion_matrix(y_true, y_pred, labels=LABELS_ORDER)
-    
-    # --- TAHAP 2: PRECISION & RECALL PER KELAS ---
     report_dict = classification_report(y_true, y_pred, labels=LABELS_ORDER, output_dict=True, zero_division=0)
-    
-    # --- TAHAP 3: MACRO AVERAGE ---
     macro_avg = report_dict['macro avg']
 
-    # --- VISUALISASI MATRIKS ---
     plt.figure(figsize=(10, 5))
     
-    # Plot Heatmap Confusion Matrix
     plt.subplot(1, 2, 1)
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=LABELS_ORDER, yticklabels=LABELS_ORDER)
     plt.ylabel('Aktual (Kunci Jawaban)')
     plt.xlabel('Prediksi Model')
     plt.title('Tahap 1: Confusion Matrix')
 
-    # Tampilkan Teks Laporan
     plt.subplot(1, 2, 2)
     plt.axis('off')
     
@@ -228,10 +234,8 @@ def calculate_metrics():
     report_text += "-"*30 + "\n"
     report_text += f"Macro Precision : {macro_avg['precision']:.2%}\n"
     report_text += f"Macro Recall    : {macro_avg['recall']:.2%}\n"
-    # report_text += f"Macro F1-Score  : {macro_avg['f1-score']:.2%}\n"
     
     plt.text(0.05, 0.95, report_text, fontsize=10, verticalalignment='top', family='monospace')
-    
     plt.tight_layout()
     plt.show()
 
@@ -240,7 +244,7 @@ def calculate_metrics():
 # ==========================================================
 if __name__ == "__main__":
     root = tk.Tk()
-    root.title("Alat Evaluasi Model")
+    root.title("Alat Evaluasi Model (Debug Version)")
     root.geometry("500x570")
     
     style = ttk.Style(root)
@@ -249,11 +253,9 @@ if __name__ == "__main__":
     main_frame = ttk.Frame(root, padding="20")
     main_frame.pack(expand=True, fill="both")
 
-    # HEADER
     ttk.Label(main_frame, text="Evaluasi Pengujian", font=("Arial", 14, "bold")).pack(pady=5)
     ttk.Label(main_frame, text="Lakukan pengujian bertahap untuk mengisi Confusion Matrix", foreground="gray").pack(pady=(0, 15))
 
-    # AREA INPUT
     input_frame = ttk.LabelFrame(main_frame, text="1. Input Data Uji (Batch)", padding="10")
     input_frame.pack(fill="x", pady=5)
 
@@ -268,7 +270,6 @@ if __name__ == "__main__":
     progress_bar = ttk.Progressbar(input_frame, orient="horizontal", mode="determinate")
     progress_bar.pack(fill="x", pady=5)
 
-    # AREA MONITORING
     summary_frame = ttk.LabelFrame(main_frame, text="Status Data Uji", padding="10")
     summary_frame.pack(fill="x", pady=10)
     
@@ -278,12 +279,11 @@ if __name__ == "__main__":
     btn_reset = ttk.Button(summary_frame, text="Reset Data", command=reset_evaluation_data)
     btn_reset.pack(anchor="e", pady=2)
 
-    # AREA EKSEKUSI
     btn_calc = ttk.Button(main_frame, text="HITUNG EVALUASI", command=calculate_metrics)
     btn_calc.pack(fill="x", pady=15, ipady=10)
 
     lbl_status = ttk.Label(main_frame, text="Siap.", foreground="blue")
     lbl_status.pack(side="bottom")
 
-    update_summary() # Cek apakah ada sisa data lama
+    update_summary()
     root.mainloop()
