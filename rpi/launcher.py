@@ -5,9 +5,10 @@ import subprocess
 import csv
 import sys
 
-SCRIPT_TRAINING = "training.py"
-SCRIPT_DIAGNOSA = "diagnose.py"
-DATABASE_FILE   = "database_fitur.csv"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SCRIPT_TRAINING = os.path.join(BASE_DIR, "training.py")
+SCRIPT_DIAGNOSA = os.path.join(BASE_DIR, "diagnose.py")
+DATABASE_FILE   = os.path.join(BASE_DIR, "database_fitur.csv")
 
 def get_database_count():
     if not os.path.exists(DATABASE_FILE):
@@ -33,13 +34,13 @@ def launch_training():
     if not os.path.exists(SCRIPT_TRAINING):
         messagebox.showerror("Error", f"File script tidak ditemukan:\n{SCRIPT_TRAINING}")
         return
-    subprocess.Popen([sys.executable, SCRIPT_TRAINING])
+    subprocess.Popen([sys.executable, SCRIPT_TRAINING], cwd=BASE_DIR)
 
 def launch_diagnosis():
     if not os.path.exists(SCRIPT_DIAGNOSA):
         messagebox.showerror("Error", f"File script tidak ditemukan:\n{SCRIPT_DIAGNOSA}")
         return
-    subprocess.Popen([sys.executable, SCRIPT_DIAGNOSA])
+    subprocess.Popen([sys.executable, SCRIPT_DIAGNOSA], cwd=BASE_DIR)
 
 def reset_database():
     if not os.path.exists(DATABASE_FILE):
