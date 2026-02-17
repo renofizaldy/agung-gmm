@@ -10,6 +10,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 
 import matplotlib.pyplot as plt
+from matplotlib.widgets import Button
 import os
 
 # ==========================================================
@@ -146,6 +147,9 @@ def start_diagnosis():
 
     try:
         # --- LANGKAH 1: PRE-PROCESSING ---
+        # Simpan gambar original asli (sebelum CLAHE) untuk histogram nanti
+        img_original = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
+
         # Membersihkan gambar pilihan pengguna menggunakan CLAHE & Gaussian Blur.
         img = preprocess_image(file_path)
 
@@ -193,12 +197,12 @@ def start_diagnosis():
         probabilitas = np.max(model.predict_proba(features_df)) * 100
 
         # Menampilkan jendela hasil
-        show_result(file_path, img, segmented_image, diagnosa, probabilitas, n_data)
+        show_result(file_path, img_original, img, segmented_image, diagnosa, probabilitas, n_data)
 
     except Exception as e:
         messagebox.showerror("Error", f"Terjadi kesalahan diagnosa:\n{e}")
 
-def show_result(path, img, seg, diagnosa, prob, n_data):
+def show_result(path, img_orig, img_clahe, seg, diagnosa, prob, n_data):
     report_text = (
         f"HASIL DIAGNOSA\n"
         f"----------------------------------\n"
@@ -212,10 +216,10 @@ def show_result(path, img, seg, diagnosa, prob, n_data):
     if "Osteoporosis" in diagnosa: bg_color = "#ffdddd"
     elif "Osteopenia" in diagnosa: bg_color = "#fff4cc"
 
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(10, 7))
     plt.subplot(1, 2, 1)
     plt.title("Citra X-Ray")
-    plt.imshow(img, cmap='gray')
+    plt.imshow(img_clahe, cmap='gray')
     plt.axis('off')
 
     plt.subplot(1, 2, 2)
@@ -226,6 +230,44 @@ def show_result(path, img, seg, diagnosa, prob, n_data):
     plt.tight_layout(rect=[0, 0, 1, 0.85])
     plt.figtext(0.5, 0.88, report_text, ha='center', va='top', fontsize=11,
                 bbox={"facecolor": bg_color, "alpha": 1, "pad": 10})
+
+    # --- FUNGSI CALLBACK UNTUK TOMBOL HISTOGRAM ---
+    def open_hist_orig(event):
+        plt.figure("Histogram Original")
+        plt.hist(img_orig.ravel(), 256, [0, 256], color='black')
+        plt.title("Histogram Citra Original")
+        plt.xlabel("Intensitas Piksel"); plt.ylabel("Frekuensi")
+        plt.show()
+
+    def open_hist_clahe(event):
+        plt.figure("Histogram CLAHE")
+        plt.hist(img_clahe.ravel(), 256, [0, 256], color='blue')
+        plt.title("Histogram Citra Setelah CLAHE")
+        plt.xlabel("Intensitas Piksel"); plt.ylabel("Frekuensi")
+        plt.show()
+
+    def open_hist_gmm(event):
+        plt.figure("Histogram Segmentasi GMM")
+        # Menggunakan 3 bins karena GMM hanya memiliki label 0, 1, 2
+        plt.hist(seg.ravel(), bins=[-0.5, 0.5, 1.5, 2.5], rwidth=0.8, color='green')
+        plt.xticks([0, 1, 2], ['Background (0)', 'Pori (1)', 'Padat (2)'])
+        plt.title("Distribusi Piksel Hasil Segmentasi GMM")
+        plt.ylabel("Jumlah Piksel")
+        plt.show()
+
+    # --- MENAMBAHKAN TOMBOL ---
+    ax_orig = plt.axes([0.15, 0.02, 0.2, 0.05]) # [left, bottom, width, height]
+    ax_clahe = plt.axes([0.40, 0.02, 0.2, 0.05])
+    ax_gmm = plt.axes([0.65, 0.02, 0.2, 0.05])
+
+    btn_orig = Button(ax_orig, 'Hist. Original', color='#f0f0f0', hovercolor='lightblue')
+    btn_clahe = Button(ax_clahe, 'Hist. CLAHE', color='#f0f0f0', hovercolor='lightblue')
+    btn_gmm = Button(ax_gmm, 'Hist. GMM', color='#f0f0f0', hovercolor='lightblue')
+
+    btn_orig.on_clicked(open_hist_orig)
+    btn_clahe.on_clicked(open_hist_clahe)
+    btn_gmm.on_clicked(open_hist_gmm)
+
     plt.show()
 
 # ==========================================================
