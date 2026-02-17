@@ -251,22 +251,44 @@ def show_result(path, img_orig, img_clahe, seg, diagnosa, prob, n_data):
         # Menggunakan 3 bins karena GMM hanya memiliki label 0, 1, 2
         plt.hist(seg.ravel(), bins=[-0.5, 0.5, 1.5, 2.5], rwidth=0.8, color='green')
         plt.xticks([0, 1, 2], ['Background (0)', 'Pori (1)', 'Padat (2)'])
-        plt.title("Distribusi Piksel Hasil Segmentasi GMM")
+        plt.title("Distribusi Piksel GMM")
         plt.ylabel("Jumlah Piksel")
         plt.show()
 
+    # --- FUNGSI CALLBACK UNTUK ANALISA NOISE ---
+    def open_noise_analysis(event):
+        # 1. Hitung Noise Map (Selisih absolut antara original dan terfilter)
+        noise_map = cv2.absdiff(img_orig, img_clahe)
+
+        # 2. Hitung MSE (Mean Squared Error)
+        mse = np.mean((img_orig.astype(np.float64) - img_clahe.astype(np.float64)) ** 2)
+
+        # Hitung PSNR menggunakan fungsi bawaan OpenCV
+        psnr = cv2.PSNR(img_orig, img_clahe)
+
+        # Tampilkan Jendela Analisa Noise
+        plt.figure("Analisa Noise Reduction", figsize=(8, 6))
+        plt.title(f"Noise Map (Residual Image)\nPSNR: {psnr:.2f} dB | MSE: {mse:.2f}")
+        plt.imshow(noise_map, cmap='hot') # Gunakan colormap 'hot' agar noise bintik putih terlihat jelas
+        plt.colorbar(label="Intensitas Noise yang Dibuang")
+        plt.axis('off')
+        plt.show()
+
     # --- MENAMBAHKAN TOMBOL ---
-    ax_orig = plt.axes([0.15, 0.02, 0.2, 0.05]) # [left, bottom, width, height]
-    ax_clahe = plt.axes([0.40, 0.02, 0.2, 0.05])
-    ax_gmm = plt.axes([0.65, 0.02, 0.2, 0.05])
+    ax_orig = plt.axes([0.03, 0.02, 0.2, 0.05]) # [left, bottom, width, height]
+    ax_clahe = plt.axes([0.27, 0.02, 0.2, 0.05])
+    ax_gmm = plt.axes([0.52, 0.02, 0.2, 0.05])
+    ax_noise = plt.axes([0.77, 0.02, 0.2, 0.05])
 
     btn_orig = Button(ax_orig, 'Hist. Original', color='#f0f0f0', hovercolor='lightblue')
     btn_clahe = Button(ax_clahe, 'Hist. CLAHE', color='#f0f0f0', hovercolor='lightblue')
     btn_gmm = Button(ax_gmm, 'Hist. GMM', color='#f0f0f0', hovercolor='lightblue')
+    btn_noise = Button(ax_noise, 'Anl. Noise', color='#f0f0f0', hovercolor='lightpink')
 
     btn_orig.on_clicked(open_hist_orig)
     btn_clahe.on_clicked(open_hist_clahe)
     btn_gmm.on_clicked(open_hist_gmm)
+    btn_noise.on_clicked(open_noise_analysis)
 
     plt.show()
 
